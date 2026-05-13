@@ -185,3 +185,13 @@ type ExampleDef struct {
 type WantTypeWrapper struct {
 	WantType WantTypeDefinition `yaml:"wantType"`
 }
+
+// ConnectivityMetadata defines want connectivity requirements and constraints
+type ConnectivityMetadata struct {
+	RequiredInputs  int    `json:"required_inputs"`
+	RequiredOutputs int    `json:"required_outputs"`
+	MaxInputs       int    `json:"max_inputs"`
+	MaxOutputs      int    `json:"max_outputs"`
+	WantType        string `json:"want_type"`
+	Description     string `json:"description"`
+}
