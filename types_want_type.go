@@ -46,6 +46,7 @@ type ParameterDef struct {
 	Type                       string          `json:"type" yaml:"type"`
 	Label                      string          `json:"label,omitempty" yaml:"label,omitempty"`
 	Default                    any             `json:"default,omitempty" yaml:"default,omitempty"`
+	DefaultGlobalParameter     string          `json:"defaultGlobalParameter,omitempty" yaml:"defaultGlobalParameter,omitempty"`
 	DefaultGlobalParameterFrom string          `json:"defaultGlobalParameterFrom,omitempty" yaml:"defaultGlobalParameterFrom,omitempty"`
 	Required                   bool            `json:"required" yaml:"required"`
 	Validation                 ValidationRules `json:"validation,omitempty" yaml:"validation,omitempty"`
