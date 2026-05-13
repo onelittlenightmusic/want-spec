@@ -50,6 +50,7 @@ type RecipeContent struct {
 	Wants                 []RecipeWant          `yaml:"wants,omitempty" json:"wants,omitempty"`
 	Parameters            map[string]any        `yaml:"parameters,omitempty" json:"parameters,omitempty"`
 	ParameterDescriptions map[string]string     `yaml:"parameter_descriptions,omitempty" json:"parameter_descriptions,omitempty"`
+	ParameterTypes        map[string]string     `yaml:"parameter_types,omitempty" json:"parameter_types,omitempty"`
 	Result                *RecipeResult         `yaml:"result,omitempty" json:"result,omitempty"`
 	Example               *RecipeExample        `yaml:"example,omitempty" json:"example,omitempty"`
 	Examples              []RecipeExampleDef    `yaml:"examples,omitempty" json:"examples,omitempty"`
