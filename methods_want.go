@@ -7,13 +7,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// GetParam returns the value for the given key from Params map
-func (s *WantSpec) GetParam(key string) (any, bool) {
+func (s WantSpec) GetParam(key string) (any, bool) {
+	if s.Params == nil { return nil, false }
 	v, ok := s.Params[key]
 	return v, ok
 }
 
-// SetParam sets a param value, initializing the map if nil
 func (s *WantSpec) SetParam(key string, val any) {
 	if s.Params == nil {
 		s.Params = make(map[string]any)
@@ -21,23 +20,20 @@ func (s *WantSpec) SetParam(key string, val any) {
 	s.Params[key] = val
 }
 
-// HasParam returns true if the key exists in Params
-func (s *WantSpec) HasParam(key string) bool {
+func (s WantSpec) HasParam(key string) bool {
+	if s.Params == nil { return false }
 	_, ok := s.Params[key]
 	return ok
 }
 
-// ParamsAsMap returns the Params map directly
-func (s *WantSpec) ParamsAsMap() map[string]any {
+func (s WantSpec) ParamsAsMap() map[string]any {
 	return s.Params
 }
 
-// SetParamsFromMap replaces Params with the given map
 func (s *WantSpec) SetParamsFromMap(m map[string]any) {
 	s.Params = m
 }
 
-// UnmarshalJSON implements json.Unmarshaler to support both old map format and new array format.
 func (s *WantSpec) UnmarshalJSON(data []byte) error {
 	type WantSpecNoParams struct {
 		Exposes             []ExposeEntry        `json:"exposes,omitempty"`
@@ -91,7 +87,6 @@ func (s *WantSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler
 func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 	if value.Kind != yaml.MappingNode {
 		return fmt.Errorf("WantSpec must be a YAML mapping")
@@ -121,9 +116,12 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 			continue
 		}
 
-		tempMap := map[string]*yaml.Node{key: val}
-		tempData, _ := yaml.Marshal(tempMap)
-		yaml.Unmarshal(tempData, &rest)
+		// Decode individual fields
+		tempNode := &yaml.Node{
+			Kind:    yaml.MappingNode,
+			Content: []*yaml.Node{value.Content[i], val},
+		}
+		tempNode.Decode(&rest)
 	}
 
 	s.Exposes = rest.Exposes
