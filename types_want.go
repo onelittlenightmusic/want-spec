@@ -60,6 +60,13 @@ type NotificationFilter struct {
 	ValuePattern  string   `json:"valuePattern,omitempty" yaml:"valuePattern,omitempty"`
 }
 
+// ParamRef allows a spec.params value to reference a global parameter by name,
+// using the same fromGlobalParam convention as WhenSpec.
+// Example YAML: budget: {fromGlobalParam: global_budget}
+type ParamRef struct {
+	FromGlobalParam string `json:"fromGlobalParam" yaml:"fromGlobalParam"`
+}
+
 // WhenSpec defines a scheduled execution time for a Want
 type WhenSpec struct {
 	At              string `json:"at,omitempty" yaml:"at,omitempty"`

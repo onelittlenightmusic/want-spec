@@ -134,12 +134,18 @@ components:
           additionalProperties: true
         params:
           type: object
-          description: Want-specific parameters (map[string]interface{})
-          additionalProperties: true
+          description: |
+            Want-specific parameters. Each value is either a literal value or a
+            global parameter reference using {fromGlobalParam: "key"} — the same
+            convention as spec.when[].fromGlobalParam.
+          additionalProperties:
+            $ref: '#/components/schemas/ParamValue'
           example:
             count: 1000
             rate: 10.0
             service_time: 0.1
+            budget:
+              fromGlobalParam: global_budget
         using:
           type: array
           description: Label selectors for connecting to other wants ([]map[string]string)
@@ -152,6 +158,44 @@ components:
               role: "source"
       additionalProperties: false
     
+    # Reference to a global parameter by name (mirrors WhenSpec.fromGlobalParam)
+    GlobalParamRef:
+      type: object
+      description: |
+        References a global parameter by name. The resolved value replaces this
+        object at runtime — consistent with the fromGlobalParam field in WhenSpec.
+      required:
+        - fromGlobalParam
+      properties:
+        fromGlobalParam:
+          type: string
+          description: Name of the global parameter to read the value from
+          example: global_budget
+      additionalProperties: false
+
+    # A single parameter value: literal or global reference
+    ParamValue:
+      description: |
+        A parameter value — either a literal (string / number / boolean / array /
+        plain object) or a global parameter reference {fromGlobalParam: "key"}.
+      oneOf:
+        - type: string
+          description: Literal string value
+        - type: number
+          description: Literal numeric value
+        - type: boolean
+          description: Literal boolean value
+        - type: array
+          description: Literal array value
+          items: {}
+        - $ref: '#/components/schemas/GlobalParamRef'
+        - type: object
+          description: Literal object value (must not contain fromGlobalParam)
+          not:
+            required:
+              - fromGlobalParam
+          additionalProperties: true
+
     # Runtime statistics (map[string]interface{})
     WantStats:
       type: object
