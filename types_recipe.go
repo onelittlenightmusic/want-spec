@@ -46,16 +46,25 @@ type RecipeExampleDef struct {
 
 // RecipeContent contains the actual recipe data
 type RecipeContent struct {
-	Metadata              GenericRecipeMetadata `yaml:"metadata,omitempty" json:"metadata,omitempty"`
-	Wants                 []RecipeWant          `yaml:"wants,omitempty" json:"wants,omitempty"`
-	Parameters            map[string]any        `yaml:"parameters,omitempty" json:"parameters,omitempty"`
-	ParameterDescriptions map[string]string     `yaml:"parameter_descriptions,omitempty" json:"parameter_descriptions,omitempty"`
-	ParameterTypes        map[string]string     `yaml:"parameter_types,omitempty" json:"parameter_types,omitempty"`
-	Result                *RecipeResult         `yaml:"result,omitempty" json:"result,omitempty"`
-	Example               *RecipeExample        `yaml:"example,omitempty" json:"example,omitempty"`
-	Examples              []RecipeExampleDef    `yaml:"examples,omitempty" json:"examples,omitempty"`
-	State                 []StateDef            `yaml:"state,omitempty" json:"state,omitempty"`
-	FinalResultField      string                `yaml:"finalResultField,omitempty" yaml:"finalResultField,omitempty"`
+	Metadata         GenericRecipeMetadata `yaml:"metadata,omitempty" json:"metadata,omitempty"`
+	Wants            []RecipeWant          `yaml:"wants,omitempty" json:"wants,omitempty"`
+	Parameters       []ParameterDef        `yaml:"parameters,omitempty" json:"parameters,omitempty"`
+	Result           *RecipeResult         `yaml:"result,omitempty" json:"result,omitempty"`
+	Example          *RecipeExample        `yaml:"example,omitempty" json:"example,omitempty"`
+	Examples         []RecipeExampleDef    `yaml:"examples,omitempty" json:"examples,omitempty"`
+	State            []StateDef            `yaml:"state,omitempty" json:"state,omitempty"`
+	FinalResultField string                `yaml:"finalResultField,omitempty" json:"finalResultField,omitempty"`
+}
+
+// ParameterDefsToMap converts []ParameterDef to a name→default map for substitution.
+func ParameterDefsToMap(params []ParameterDef) map[string]any {
+	m := make(map[string]any, len(params))
+	for _, p := range params {
+		if p.Default != nil {
+			m[p.Name] = p.Default
+		}
+	}
+	return m
 }
 
 // GenericRecipeMetadata contains recipe information
