@@ -16,7 +16,7 @@ components:
       anyOf:
         - $ref: '#/components/schemas/DirectWantsConfig'
         - $ref: '#/components/schemas/RecipeBasedConfig'
-    
+
     # Configuration with directly defined wants array
     DirectWantsConfig:
       type: object
@@ -30,8 +30,8 @@ components:
           items:
             $ref: '#/components/schemas/Want'
       additionalProperties: false
-    
-    # Configuration that references a recipe file  
+
+    # Configuration that references a recipe file
     RecipeBasedConfig:
       type: object
       description: Configuration that references a recipe file
@@ -41,7 +41,7 @@ components:
         recipe:
           $ref: '#/components/schemas/RecipeReference'
       additionalProperties: false
-    
+
     # Recipe reference with path and parameters
     RecipeReference:
       type: object
@@ -66,22 +66,16 @@ components:
     # A processing unit in the chain
     Want:
       type: object
-      description: A processing unit in the chain with metadata, spec, status, and state
+      description: A processing unit in the chain with metadata and spec
       properties:
         metadata:
           $ref: '#/components/schemas/Metadata'
         spec:
           $ref: '#/components/schemas/WantSpec'
-        status:
-          $ref: '#/components/schemas/WantStatus'
-        state:
-          type: object
-          additionalProperties: true
-          description: Current state of the want
       required:
         - metadata
         - spec
-    
+
     # Want metadata with name, type, labels, owner references
     Metadata:
       type: object
@@ -113,7 +107,7 @@ components:
           items:
             $ref: '#/components/schemas/OwnerReference'
       additionalProperties: false
-    
+
     # Want specification with parameters and dependencies
     WantSpec:
       type: object
@@ -121,17 +115,6 @@ components:
       required:
         - params
       properties:
-        template:
-          type: string
-          description: "Deprecated: Template reference, use recipe instead"
-          deprecated: true
-        recipe:
-          type: string
-          description: Recipe reference for this want
-        recipe_params:
-          type: object
-          description: Parameters for recipe instantiation (map[string]interface{})
-          additionalProperties: true
         params:
           type: object
           description: |
@@ -146,6 +129,25 @@ components:
             service_time: 0.1
             budget:
               fromGlobalParam: global_budget
+        exposes:
+          type: array
+          description: |
+            Declares parameters or state fields to expose to a higher scope
+            (e.g. from a child want up to its parent/global scope).
+          items:
+            $ref: '#/components/schemas/ExposeEntry'
+        imports:
+          type: object
+          description: |
+            Maps global-state keys to internal state keys.
+            Imported fields are read-only: reads transparently return the current
+            global-state value; writes are silently blocked.
+            Values are never copied — they are always resolved live.
+            Format: { globalKey: internalKey }
+          additionalProperties:
+            type: string
+          example:
+            global_budget: local_budget
         using:
           type: array
           description: Label selectors for connecting to other wants ([]map[string]string)
@@ -156,8 +158,138 @@ components:
               type: string
             example:
               role: "source"
+        recipe:
+          type: string
+          description: Recipe reference for this want
+        stateSubscriptions:
+          type: array
+          description: State-change subscriptions from other wants
+          items:
+            $ref: '#/components/schemas/StateSubscription'
+        notificationFilters:
+          type: array
+          description: Filters applied to received notifications
+          items:
+            $ref: '#/components/schemas/NotificationFilter'
+        requires:
+          type: array
+          description: Agent capability requirements (e.g. ThinkAgent capabilities)
+          items:
+            type: string
+          example:
+            - "weather_lookup"
+        when:
+          type: array
+          description: Scheduled execution times for this want
+          items:
+            $ref: '#/components/schemas/WhenSpec'
+        finalResultField:
+          type: string
+          description: |
+            Name of the state key whose value is used as the final_result.
+            Overrides the want type's default finalResultField if set.
+          example: "final_itinerary"
+        resetOnRestart:
+          type: boolean
+          description: |
+            If true (default), state is reset when the want restarts.
+            Set to false to preserve state across restarts.
+          default: true
       additionalProperties: false
-    
+
+    # Expose entry — declares a param or state exposure between scope levels
+    ExposeEntry:
+      type: object
+      description: |
+        Declares a parameter or state-field exposure from this want to a higher scope.
+        Exactly one of `param` or `currentState` must be set.
+      required:
+        - as
+      properties:
+        param:
+          type: string
+          description: Name of the spec.params key to expose
+          example: "budget"
+        currentState:
+          type: string
+          description: Name of the current-state field to expose
+          example: "final_result"
+        as:
+          type: string
+          description: Key name visible in the outer scope
+          example: "child_budget"
+      additionalProperties: false
+
+    # State subscription — subscribe to state changes from another want
+    StateSubscription:
+      type: object
+      description: Subscribes to state changes from a named want
+      required:
+        - wantName
+      properties:
+        wantName:
+          type: string
+          description: Name of the want to subscribe to
+          example: "data-source"
+        stateKeys:
+          type: array
+          description: Specific state keys to watch (empty = all)
+          items:
+            type: string
+        conditions:
+          type: array
+          description: Filter expressions; only trigger when all conditions are met
+          items:
+            type: string
+        bufferSize:
+          type: integer
+          description: Notification buffer size (0 = default)
+          default: 0
+      additionalProperties: false
+
+    # Notification filter — filter incoming notifications
+    NotificationFilter:
+      type: object
+      description: Filters notifications received by this want
+      required:
+        - sourcePattern
+      properties:
+        sourcePattern:
+          type: string
+          description: Glob / regex pattern matching the notification source want name
+          example: "sensor-*"
+        stateKeys:
+          type: array
+          description: Restrict to these state keys (empty = all)
+          items:
+            type: string
+        valuePattern:
+          type: string
+          description: Optional regex applied to the serialised notification value
+          example: "^(high|critical)$"
+      additionalProperties: false
+
+    # Scheduled execution time
+    WhenSpec:
+      type: object
+      description: |
+        Defines a scheduled execution time for a Want.
+        Exactly one of `at`, `every`, or `fromGlobalParam` should be set.
+      properties:
+        at:
+          type: string
+          description: Absolute time expression (e.g. cron string or ISO-8601 datetime)
+          example: "0 9 * * 1-5"
+        every:
+          type: string
+          description: Repeat interval (e.g. "30s", "5m", "1h")
+          example: "5m"
+        fromGlobalParam:
+          type: string
+          description: Name of a global parameter that resolves to an `at` or `every` value
+          example: "check_interval"
+      additionalProperties: false
+
     # Reference to a global parameter by name (mirrors WhenSpec.fromGlobalParam)
     GlobalParamRef:
       type: object
@@ -196,38 +328,6 @@ components:
               - fromGlobalParam
           additionalProperties: true
 
-    # Runtime statistics (map[string]interface{})
-    WantStats:
-      type: object
-      description: Runtime statistics for want execution
-      additionalProperties: true
-      example:
-        processed_count: 1000
-        processing_rate: 25.5
-        total_execution_time: 40.2
-
-    # Travel Coordinator State Example
-    TravelCoordinatorState:
-      type: object
-      description: State generated by travel_coordinator want
-      additionalProperties: true
-      example:
-        final_itinerary: []
-        schedules: []
-        total_processed: 3
-        finalResult: "Restaurant: Restaurant Name, 18:00 to 20:00\nHotel: Hotel Name, 21:00 to 09:00\nBuffet: Buffet Name, 09:00 to 10:00\n"
-    
-    # Want execution status
-    WantStatus:
-      type: string
-      description: Current execution status of the want
-      enum:
-        - "idle"
-        - "running" 
-        - "completed"
-        - "failed"
-      default: "idle"
-    
     # Owner reference for hierarchical management
     OwnerReference:
       type: object

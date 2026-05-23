@@ -47,7 +47,7 @@ components:
           $ref: '#/components/schemas/ConnectivityDef'
         connect:
           $ref: '#/components/schemas/RequireSpec'
-          description: New connectivity requirement field
+          description: Connectivity requirement specification
         require:
           $ref: '#/components/schemas/RequireSpec'
           description: Structured connectivity requirement (deprecated, use connect)
@@ -60,66 +60,47 @@ components:
           items:
             type: string
           default: []
+        monitorCapabilities:
+          type: array
+          description: MonitorAgent capabilities provided by this want type
+          items:
+            $ref: '#/components/schemas/MonitorCapabilityDef'
+          default: []
         finalResultField:
           type: string
           description: Default state key for final_result
-        achievedWhen:
-          description: "Deprecated: use finalizeWhen.achieved instead."
-          type: object
-          properties:
-            field:
-              type: string
-            operator:
-              type: string
-              enum: ["==", "!=", ">", ">=", "<", "<="]
-            value: {}
-          required: [field, operator, value]
-          additionalProperties: false
-        finalizeWhen:
-          description: Declarative termination conditions grouping achieved and failed outcomes.
-          type: object
-          properties:
-            achieved:
-              type: object
-              properties:
-                field:
-                  type: string
-                operator:
-                  type: string
-                  enum: ["==", "!=", ">", ">=", "<", "<="]
-                value: {}
-              required: [field, operator, value]
-              additionalProperties: false
-            failed:
-              type: object
-              properties:
-                field:
-                  type: string
-                operator:
-                  type: string
-                  enum: ["==", "!=", ">", ">=", "<", "<="]
-                value: {}
-              required: [field, operator, value]
-              additionalProperties: false
-          additionalProperties: false
-        onInitialize:
-          description: Actions to execute when the want is initialized
-          $ref: '#/components/schemas/LifecycleHookDef'
-        onDelete:
-          description: Actions to execute when the want is deleted
-          $ref: '#/components/schemas/LifecycleHookDef'
-        inlineAgents:
-          type: array
-          description: Inline agent definitions with embedded scripts
-          items:
-            $ref: '#/components/schemas/InlineAgentDef'
-          default: []
+        globalOverrideFrom:
+          type: string
+          description: |
+            Name of a global parameter whose value is written into this want's state
+            on initialization, overriding any local default.
         agents:
           type: array
           description: Agent definitions
           items:
             $ref: '#/components/schemas/AgentDef'
           default: []
+        inlineAgents:
+          type: array
+          description: Inline agent definitions with embedded scripts
+          items:
+            $ref: '#/components/schemas/InlineAgentDef'
+          default: []
+        finalizeWhen:
+          description: Declarative termination conditions grouping achieved and failed outcomes.
+          $ref: '#/components/schemas/FinalizeWhen'
+        achievedWhen:
+          description: "Deprecated: use finalizeWhen.achieved instead."
+          $ref: '#/components/schemas/ConditionDef'
+        onInitialize:
+          description: Actions to execute when the want is initialized
+          $ref: '#/components/schemas/LifecycleHookDef'
+        onDelete:
+          description: Actions to execute when the want is deleted
+          $ref: '#/components/schemas/LifecycleHookDef'
+        onAchieved:
+          description: Actions to execute when the want reaches the achieved state
+          $ref: '#/components/schemas/LifecycleHookDef'
         constraints:
           type: array
           description: Business logic constraints
@@ -144,6 +125,12 @@ components:
           items:
             type: string
           default: []
+        goType:
+          type: string
+          description: |
+            Fully-qualified Go type name that implements this want type's engine logic.
+            Used by the engine to instantiate the correct struct at runtime.
+          example: "mywant.QueueWant"
       additionalProperties: false
 
     # Want type metadata
@@ -188,6 +175,11 @@ components:
           type: boolean
           description: If true, hide from user-facing want type selector
           default: false
+        labels:
+          type: object
+          description: Key-value labels for grouping or filtering want types
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     # Parameter definition
@@ -210,11 +202,22 @@ components:
         type:
           type: string
           description: Go type (int, float64, string, bool, []string, map[string]any)
+        label:
+          type: string
+          description: |
+            UI / semantic label for this parameter (e.g. "goal", "current", "plan", "internal").
+          enum: [goal, current, plan, internal]
         default:
           description: Default value
         defaultGlobalParameter:
           type: string
           description: Global parameter key to use as fallback when neither spec.params nor default is set
+          pattern: '^[a-z][a-z0-9_]*$'
+        defaultGlobalParameterFrom:
+          type: string
+          description: |
+            Like defaultGlobalParameter but the key itself is resolved from another
+            global parameter. Useful for indirection (e.g. tenant-specific defaults).
           pattern: '^[a-z][a-z0-9_]*$'
         required:
           type: boolean
@@ -265,13 +268,13 @@ components:
         type:
           type: string
           description: State field type
-        persistent:
-          type: boolean
-          description: Whether state persists across restarts
         label:
           type: string
           description: State label (goal, current, plan, internal)
           enum: [goal, current, plan, internal]
+        persistent:
+          type: boolean
+          description: Whether state persists across restarts
         initialValue:
           description: Initial value
         example:
@@ -279,6 +282,12 @@ components:
         onFetchData:
           type: string
           description: JSON path to extract from script json_data output (e.g. "routes[0].departure")
+        fetchFrom:
+          type: string
+          description: |
+            State key (in another want or global scope) to transparently read the
+            value from. Useful for aliasing a remote field into local state.
+          example: "global_budget"
       additionalProperties: false
 
     # Connectivity definition
@@ -320,6 +329,9 @@ components:
             - agent
             - state
             - event
+        data_type:
+          type: string
+          description: Optional data type carried by this channel
         description:
           type: string
           description: Channel description
@@ -379,6 +391,9 @@ components:
         type:
           type: string
           description: Connection type
+        data_type:
+          type: string
+          description: Optional data type for this connection
         description:
           type: string
           description: Connection description
@@ -396,10 +411,27 @@ components:
       description: Deprecated usage limit specification (use connect instead)
       additionalProperties: true
 
+    # Monitor capability definition
+    MonitorCapabilityDef:
+      type: object
+      description: Describes a capability provided by a MonitorAgent in this want type
+      required:
+        - capability
+      properties:
+        capability:
+          type: string
+          description: Capability identifier string
+          example: "temperature_read"
+        intervalSeconds:
+          type: integer
+          description: Default polling interval in seconds (0 = event-driven)
+          default: 0
+      additionalProperties: false
+
     # Lifecycle hook definition
     LifecycleHookDef:
       type: object
-      description: Actions executed at a want lifecycle event (onInitialize, onDelete)
+      description: Actions executed at a want lifecycle event (onInitialize, onDelete, onAchieved)
       properties:
         params:
           type: object
@@ -418,16 +450,53 @@ components:
           type: object
           description: Set goal state fields to literal values
           additionalProperties: true
+        mergeParent:
+          type: object
+          description: |
+            Merge fields from the parent want's state into this want's state.
+            Key = local state field, value = parent state field to copy from.
+          additionalProperties: true
         executeAgents:
           type: boolean
           description: Call ExecuteAgents() after applying state changes
+      additionalProperties: false
+
+    # Condition definition
+    ConditionDef:
+      type: object
+      description: Single declarative state condition
+      required:
+        - field
+        - operator
+        - value
+      properties:
+        field:
+          type: string
+          description: State field name to evaluate
+        operator:
+          type: string
+          description: Comparison operator
+          enum: ["==", "!=", ">", ">=", "<", "<="]
+        value:
+          description: Value to compare against
+      additionalProperties: false
+
+    # Finalize when (groups achieved + failed conditions)
+    FinalizeWhen:
+      type: object
+      description: Declarative termination conditions grouping achieved and failed outcomes.
+      properties:
+        achieved:
+          $ref: '#/components/schemas/ConditionDef'
+        failed:
+          $ref: '#/components/schemas/ConditionDef'
       additionalProperties: false
 
     # Inline agent definition
     InlineAgentDef:
       type: object
       description: Executable agent with inline script embedded in a YAML want type
-      required: [name, type, runtime, script]
+      required: [name, type, runtime]
       properties:
         name:
           type: string
@@ -439,9 +508,14 @@ components:
           enum: [shell, python, rego]
         script:
           type: string
+          description: Inline script source
+        scriptFile:
+          type: string
+          description: Path to an external script file (alternative to script)
         interval:
           type: integer
           description: Execution interval in seconds (0 = default)
+          default: 0
       additionalProperties: false
 
     # Agent definition

@@ -9,10 +9,12 @@ info:
 
 components:
   schemas:
-    # Root capability configuration object
+    # -------------------------------------------------------------------------
+    # capability-*.yaml  (CapabilityYAML wrapper)
+    # -------------------------------------------------------------------------
     CapabilityYAML:
       type: object
-      description: Root configuration object for capabilities
+      description: Root configuration object for capability files (capability-*.yaml)
       required:
         - capabilities
       properties:
@@ -26,7 +28,7 @@ components:
     CapabilityConfig:
       $ref: '#/components/schemas/CapabilityYAML'
 
-    # State access field definition (used by Capability)
+    # State access field declared by a capability
     StateAccessField:
       type: object
       description: Declares a state field that agents with this capability can access
@@ -54,7 +56,6 @@ components:
             - update
             - readUpdate
           default: readUpdate
-          example: "readUpdate"
       additionalProperties: false
 
     # Individual capability definition
@@ -84,31 +85,26 @@ components:
           type: string
           description: Human-readable description of the capability
           example: "Provides hotel booking and management services"
-        version:
-          type: string
-          description: Version of the capability
-          pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
-          example: "1.0.0"
         stateAccess:
           type: array
           description: State fields that agents with this capability may read or write
           items:
             $ref: '#/components/schemas/StateAccessField'
+          default: []
         parentStateAccess:
           type: array
           description: Parent want state fields that agents with this capability may access via StoreParentState/GetParentState
           items:
             $ref: '#/components/schemas/StateAccessField'
-        metadata:
-          type: object
-          description: Additional metadata for the capability
-          additionalProperties: true
+          default: []
       additionalProperties: false
 
-    # Root agent configuration object
+    # -------------------------------------------------------------------------
+    # agent-*.yaml  (AgentYAML wrapper)
+    # -------------------------------------------------------------------------
     AgentYAML:
       type: object
-      description: Root configuration object for agents
+      description: Root configuration object for agent files (agent-*.yaml)
       required:
         - agents
       properties:
@@ -116,16 +112,16 @@ components:
           type: array
           description: Array of agent definitions
           items:
-            $ref: '#/components/schemas/Agent'
+            $ref: '#/components/schemas/AgentEntry'
       additionalProperties: false
 
     AgentConfig:
       $ref: '#/components/schemas/AgentYAML'
 
-    # Individual agent definition
-    Agent:
+    # Individual agent entry in an agent YAML file
+    AgentEntry:
       type: object
-      description: An agent that can execute actions or monitor state
+      description: An agent registered with the engine
       required:
         - name
         - type
@@ -139,15 +135,22 @@ components:
           example: "agent_premium"
         type:
           type: string
-          description: Type of agent determining its behavior
+          description: Type of agent determining its execution strategy
           enum:
             - "do"
             - "monitor"
             - "think"
           example: "do"
+        runtime:
+          type: string
+          description: Runtime environment for the agent
+          enum:
+            - "localGo"
+            - "docker"
+          default: "localGo"
         capabilities:
           type: array
-          description: List of capabilities this agent has
+          description: List of capabilities this agent provides
           items:
             type: string
             minLength: 1
@@ -156,103 +159,107 @@ components:
           example: ["hotel_agency", "payment_processing"]
         uses:
           type: array
-          description: List of resources or dependencies this agent uses
+          description: List of resources or external dependencies this agent uses
           items:
             type: string
             minLength: 1
           example: ["booking_api", "payment_gateway"]
-        description:
-          type: string
-          description: Human-readable description of the agent
-          example: "Premium hotel booking agent with VIP services"
-        config:
-          type: object
-          description: Agent-specific configuration parameters
-          additionalProperties: true
-          example:
-            timeout: 30
-            retry_count: 3
-            api_endpoint: "https://api.hotel.com"
-        priority:
-          type: integer
-          description: Execution priority (higher number = higher priority)
-          minimum: 0
-          maximum: 100
-          default: 50
-          example: 75
-        enabled:
-          type: boolean
-          description: Whether this agent is enabled
-          default: true
-          example: true
-        tags:
-          type: array
-          description: Tags for categorizing and filtering agents
-          items:
-            type: string
-            pattern: '^[a-zA-Z0-9_-]+$'
-          example: ["production", "premium", "hotel"]
-        version:
-          type: string
-          description: Version of the agent
-          pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
-          example: "2.1.0"
-        metadata:
-          type: object
-          description: Additional metadata for the agent
-          additionalProperties: true
       additionalProperties: false
 
-    # Agent execution context
-    AgentExecutionContext:
+    # -------------------------------------------------------------------------
+    # Machine-Readable Skill (MRS) plugin agent  (agent: key in plugin YAML)
+    # -------------------------------------------------------------------------
+    MRSAgentDef:
       type: object
-      description: Context passed to agents during execution
+      description: |
+        Machine-Readable Skill agent definition — parsed from the top-level `agent:`
+        key in a plugin YAML file. Declares a Python-based plugin agent with its
+        capability, script path, and state updates.
+      required:
+        - metadata
+        - script
       properties:
-        want_name:
-          type: string
-          description: Name of the want requesting agent execution
-        requirements:
-          type: array
-          description: List of requirements the want needs fulfilled
-          items:
-            type: string
-        timeout:
-          type: integer
-          description: Maximum execution time in seconds
-          minimum: 1
-          default: 300
-        environment:
-          type: object
-          description: Environment variables and settings
-          additionalProperties: true
-      additionalProperties: false
-
-    # Agent execution result
-    AgentExecutionResult:
-      type: object
-      description: Result returned by agent execution
-      properties:
-        success:
-          type: boolean
-          description: Whether the agent execution was successful
-        state_changes:
-          type: object
-          description: State changes made by the agent
-          additionalProperties: true
-        error:
-          type: string
-          description: Error message if execution failed
-        duration:
-          type: number
-          description: Execution duration in seconds
-          minimum: 0
         metadata:
-          type: object
-          description: Additional execution metadata
-          additionalProperties: true
+          $ref: '#/components/schemas/MRSAgentMetadata'
+        script:
+          $ref: '#/components/schemas/MRSScriptDef'
+        state_updates:
+          type: array
+          description: State fields that this agent writes to
+          items:
+            $ref: '#/components/schemas/MRSStateUpdate'
+          default: []
       additionalProperties: false
 
-# Example usage paths (for documentation)
+    MRSAgentMetadata:
+      type: object
+      description: Identity and classification of an MRS plugin agent
+      required:
+        - capability
+        - type
+      properties:
+        name:
+          type: string
+          description: Agent name (defaults to capability if empty)
+          example: "weather_monitor"
+        capability:
+          type: string
+          description: Registered capability name (referenced in wantType.requires)
+          example: "weather_lookup"
+        type:
+          type: string
+          description: Agent execution type
+          enum: ["monitor", "do"]
+          example: "monitor"
+      additionalProperties: false
+
+    MRSScriptDef:
+      type: object
+      description: Python script executed by an MRS plugin agent
+      required:
+        - path
+      properties:
+        path:
+          type: string
+          description: Absolute or ~/ path to the Python script
+          example: "~/scripts/weather_check.py"
+        timeout_seconds:
+          type: integer
+          description: Maximum execution time in seconds (0 → default 120s)
+          default: 0
+          minimum: 0
+      additionalProperties: false
+
+    MRSStateUpdate:
+      type: object
+      description: Declares a state field that the plugin agent writes, along with the JSON path used to extract the value from script output
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: State field name
+          example: "temperature_celsius"
+        type:
+          type: string
+          description: Go type of the state field
+          example: "float64"
+        label:
+          type: string
+          description: State semantic label
+          enum: [current, goal, plan, internal]
+          example: "current"
+        persistent:
+          type: boolean
+          description: Whether state persists across restarts
+          default: false
+        onFetchData:
+          type: string
+          description: JSON path into script output to extract the value (e.g. "routes[0].summary")
+          example: "temperature"
+      additionalProperties: false
+
 paths:
   /capabilities:
     get:
@@ -281,4 +288,3 @@ paths:
                 $ref: '#/components/schemas/AgentConfig'
         '400':
           description: Invalid agent configuration
-
