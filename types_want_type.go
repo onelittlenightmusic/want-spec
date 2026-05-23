@@ -1,5 +1,15 @@
 package want_spec
 
+// StateLabel is the set of valid label values for a StateDef.
+type StateLabel string
+
+const (
+	StateLabelGoal     StateLabel = "goal"
+	StateLabelCurrent  StateLabel = "current"
+	StateLabelPlan     StateLabel = "plan"
+	StateLabelInternal StateLabel = "internal"
+)
+
 // WantTypeDefinition represents a complete want type definition
 type WantTypeDefinition struct {
 	Metadata            WantTypeMetadata       `json:"metadata" yaml:"metadata"`
@@ -66,7 +76,7 @@ type StateDef struct {
 	Name         string `json:"name" yaml:"name"`
 	Description  string `json:"description" yaml:"description"`
 	Type         string `json:"type" yaml:"type"`
-	Label        string `json:"label,omitempty" yaml:"label,omitempty"`
+	Label        StateLabel `json:"label,omitempty" yaml:"label,omitempty"`
 	Persistent   bool   `json:"persistent" yaml:"persistent"`
 	InitialValue any    `json:"initialValue,omitempty" yaml:"initialValue,omitempty"`
 	Example      any    `json:"example,omitempty" yaml:"example,omitempty"`
