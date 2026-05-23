@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
+
 	"gopkg.in/yaml.v3"
 )
 
 func (s WantSpec) GetParam(key string) (any, bool) {
-	if s.Params == nil { return nil, false }
+	if s.Params == nil {
+		return nil, false
+	}
 	v, ok := s.Params[key]
 	return v, ok
 }
@@ -21,7 +25,9 @@ func (s *WantSpec) SetParam(key string, val any) {
 }
 
 func (s WantSpec) HasParam(key string) bool {
-	if s.Params == nil { return false }
+	if s.Params == nil {
+		return false
+	}
 	_, ok := s.Params[key]
 	return ok
 }
@@ -34,9 +40,63 @@ func (s *WantSpec) SetParamsFromMap(m map[string]any) {
 	s.Params = m
 }
 
+// knownWantSpecJSONFields lists all JSON field names declared in WantSpec.
+// Used for unknown-field detection — callers can log or error on any key not in this set.
+var knownWantSpecJSONFields = func() map[string]struct{} {
+	fields := []string{
+		"params",
+		"exposes",
+		"imports",
+		"using",
+		"recipe",
+		"stateSubscriptions",
+		"notificationFilters",
+		"requires",
+		"when",
+		"finalResultField",
+		"resetOnRestart",
+	}
+	m := make(map[string]struct{}, len(fields))
+	for _, f := range fields {
+		m[f] = struct{}{}
+	}
+	return m
+}()
+
+// KnownWantSpecJSONFields returns a snapshot of the JSON field names that WantSpec
+// currently recognises. mywant (or any other consumer) can call this to detect
+// unknown fields arriving from an API client that was built against a newer spec.
+func KnownWantSpecJSONFields() []string {
+	out := make([]string, 0, len(knownWantSpecJSONFields))
+	for k := range knownWantSpecJSONFields {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// UnmarshalJSON decodes a WantSpec from JSON.
+//
+// params is handled specially: it may be either a JSON object (map[string]any)
+// or a JSON array of {key, value} entries ([]ParamEntry).  All other fields are
+// decoded normally.
+//
+// If the JSON contains a key that is not listed in knownWantSpecJSONFields the
+// field is silently ignored here; callers that want to detect schema drift should
+// call KnownWantSpecJSONFields() and compare against the raw JSON themselves.
 func (s *WantSpec) UnmarshalJSON(data []byte) error {
-	type WantSpecNoParams struct {
+	// ── Step 1: grab every raw key so we can pass unknown fields back ──────
+	var allRaw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &allRaw); err != nil {
+		return err
+	}
+
+	// ── Step 2: decode all known fields except params ───────────────────────
+	// Use a shadow type (no Params) to avoid infinite recursion and to keep
+	// the params special-casing below.
+	type wantSpecKnown struct {
 		Exposes             []ExposeEntry        `json:"exposes,omitempty"`
+		Imports             map[string]string    `json:"imports,omitempty"`
 		Using               []map[string]string  `json:"using,omitempty"`
 		Recipe              string               `json:"recipe,omitempty"`
 		StateSubscriptions  []StateSubscription  `json:"stateSubscriptions,omitempty"`
@@ -47,13 +107,15 @@ func (s *WantSpec) UnmarshalJSON(data []byte) error {
 		ResetOnRestart      *bool                `json:"resetOnRestart,omitempty"`
 	}
 	var raw struct {
-		WantSpecNoParams
+		wantSpecKnown
 		Params json.RawMessage `json:"params"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
+
 	s.Exposes = raw.Exposes
+	s.Imports = raw.Imports
 	s.Using = raw.Using
 	s.Recipe = raw.Recipe
 	s.StateSubscriptions = raw.StateSubscriptions
@@ -63,10 +125,20 @@ func (s *WantSpec) UnmarshalJSON(data []byte) error {
 	s.FinalResultField = raw.FinalResultField
 	s.ResetOnRestart = raw.ResetOnRestart
 
+	// ── Step 3: detect unknown fields ───────────────────────────────────────
+	// Populate UnknownFields so callers can log schema-drift warnings.
+	s.UnknownFields = nil
+	for k := range allRaw {
+		if _, known := knownWantSpecJSONFields[k]; !known {
+			s.UnknownFields = append(s.UnknownFields, k)
+		}
+	}
+	sort.Strings(s.UnknownFields)
+
+	// ── Step 4: decode params (object or array format) ──────────────────────
 	if raw.Params == nil {
 		return nil
 	}
-
 	trimmed := bytes.TrimSpace(raw.Params)
 	if len(trimmed) > 0 && trimmed[0] == '[' {
 		var entries []ParamEntry
@@ -87,13 +159,41 @@ func (s *WantSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// knownWantSpecYAMLFields lists all YAML field names declared in WantSpec.
+var knownWantSpecYAMLFields = func() map[string]struct{} {
+	fields := []string{
+		"params",
+		"exposes",
+		"imports",
+		"using",
+		"recipe",
+		"stateSubscriptions",
+		"notificationFilters",
+		"requires",
+		"when",
+		"finalResultField",
+		"resetOnRestart",
+	}
+	m := make(map[string]struct{}, len(fields))
+	for _, f := range fields {
+		m[f] = struct{}{}
+	}
+	return m
+}()
+
+// UnmarshalYAML decodes a WantSpec from a YAML mapping node.
+//
+// params is handled specially (object or sequence format).  Unknown keys are
+// collected in UnknownFields.
 func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 	if value.Kind != yaml.MappingNode {
 		return fmt.Errorf("WantSpec must be a YAML mapping")
 	}
 
+	// Shadow struct for all non-params fields.
 	type restSpec struct {
 		Exposes             []ExposeEntry        `yaml:"exposes,omitempty"`
+		Imports             map[string]string    `yaml:"imports,omitempty"`
 		Using               []map[string]string  `yaml:"using,omitempty"`
 		Recipe              string               `yaml:"recipe,omitempty"`
 		StateSubscriptions  []StateSubscription  `yaml:"stateSubscriptions,omitempty"`
@@ -106,25 +206,37 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 
 	var paramsNode *yaml.Node
 	var rest restSpec
+	s.UnknownFields = nil
 
-	for i := 0; i < len(value.Content); i += 2 {
-		key := value.Content[i].Value
-		val := value.Content[i+1]
+	for i := 0; i+1 < len(value.Content); i += 2 {
+		keyNode := value.Content[i]
+		valNode := value.Content[i+1]
+		key := keyNode.Value
 
 		if key == "params" {
-			paramsNode = val
+			paramsNode = valNode
 			continue
 		}
 
-		// Decode individual fields
+		// Detect unknown fields.
+		if _, known := knownWantSpecYAMLFields[key]; !known {
+			s.UnknownFields = append(s.UnknownFields, key)
+			continue
+		}
+
+		// Decode into restSpec by building a temporary single-key mapping.
 		tempNode := &yaml.Node{
 			Kind:    yaml.MappingNode,
-			Content: []*yaml.Node{value.Content[i], val},
+			Content: []*yaml.Node{keyNode, valNode},
 		}
-		tempNode.Decode(&rest)
+		if err := tempNode.Decode(&rest); err != nil {
+			return fmt.Errorf("WantSpec field %q: %w", key, err)
+		}
 	}
+	sort.Strings(s.UnknownFields)
 
 	s.Exposes = rest.Exposes
+	s.Imports = rest.Imports
 	s.Using = rest.Using
 	s.Recipe = rest.Recipe
 	s.StateSubscriptions = rest.StateSubscriptions
@@ -134,24 +246,25 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 	s.FinalResultField = rest.FinalResultField
 	s.ResetOnRestart = rest.ResetOnRestart
 
-	if paramsNode != nil {
-		if paramsNode.Kind == yaml.SequenceNode {
-			var entries []ParamEntry
-			if err := paramsNode.Decode(&entries); err != nil {
-				return err
-			}
-			s.Params = make(map[string]any, len(entries))
-			for _, e := range entries {
-				s.Params[e.Key] = e.Value
-			}
-		} else {
-			var m map[string]any
-			if err := paramsNode.Decode(&m); err != nil {
-				return err
-			}
-			s.Params = m
-		}
+	// ── params: object or sequence ───────────────────────────────────────────
+	if paramsNode == nil {
+		return nil
 	}
-
+	if paramsNode.Kind == yaml.SequenceNode {
+		var entries []ParamEntry
+		if err := paramsNode.Decode(&entries); err != nil {
+			return err
+		}
+		s.Params = make(map[string]any, len(entries))
+		for _, e := range entries {
+			s.Params[e.Key] = e.Value
+		}
+	} else {
+		var m map[string]any
+		if err := paramsNode.Decode(&m); err != nil {
+			return err
+		}
+		s.Params = m
+	}
 	return nil
 }

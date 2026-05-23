@@ -74,6 +74,14 @@ type WhenSpec struct {
 	FromGlobalParam string `json:"fromGlobalParam,omitempty" yaml:"fromGlobalParam,omitempty"`
 }
 
+// Want is the canonical DTO representing a single want.
+// It contains only the client-mutable fields (Metadata and Spec).
+// Runtime-only fields (goroutines, channels, state maps) live in the engine's internal Want type.
+type Want struct {
+	Metadata Metadata `json:"metadata" yaml:"metadata"`
+	Spec     WantSpec `json:"spec" yaml:"spec"`
+}
+
 // WantSpec contains the desired state configuration for a want
 type WantSpec struct {
 	Params              map[string]any       `json:"params" yaml:"params"`
@@ -90,4 +98,10 @@ type WantSpec struct {
 	When                []WhenSpec           `json:"when,omitempty" yaml:"when,omitempty"`
 	FinalResultField    string               `json:"finalResultField,omitempty" yaml:"finalResultField,omitempty"`
 	ResetOnRestart      *bool                `json:"resetOnRestart,omitempty" yaml:"resetOnRestart,omitempty"`
+
+	// UnknownFields is populated by UnmarshalJSON / UnmarshalYAML when the input
+	// contains keys that this version of the spec does not recognise.  It is
+	// intentionally omitted from JSON/YAML output so it does not round-trip.
+	// Consumers (e.g. mywant engine) should log a warning when this is non-empty.
+	UnknownFields []string `json:"-" yaml:"-"`
 }
