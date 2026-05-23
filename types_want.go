@@ -78,6 +78,10 @@ type WhenSpec struct {
 type WantSpec struct {
 	Params              map[string]any       `json:"params" yaml:"params"`
 	Exposes             []ExposeEntry        `json:"exposes,omitempty" yaml:"exposes,omitempty"`
+	// Imports maps global state keys to internal state keys.
+	// Imported fields are read-only: reads transparently return the current global state value;
+	// writes are silently blocked. Values are never copied — they are always resolved live.
+	Imports             map[string]string    `json:"imports,omitempty" yaml:"imports,omitempty"`
 	Using               []map[string]string  `json:"using,omitempty" yaml:"using,omitempty"`
 	Recipe              string               `json:"recipe,omitempty" yaml:"recipe,omitempty"`
 	StateSubscriptions  []StateSubscription  `json:"stateSubscriptions,omitempty" yaml:"stateSubscriptions,omitempty"`
