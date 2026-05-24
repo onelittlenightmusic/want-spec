@@ -49,14 +49,16 @@ type ParamEntry struct {
 // ExposeEntry declares a parameter or state exposure between scope levels.
 //
 // Supported combinations:
-//   - Param + As:         top-down — receive a param from upper scope (global or parent) into local param.
-//   - CurrentState + As:  bottom-up — push local current state to parent's state (or global state if no parent).
-//   - CurrentState + AsGoal: bottom-up — push local current state to parent's Goal-labeled state via SetGoal.
+//   - Param + As:              top-down — receive a param from upper scope (global or parent) into local param.
+//   - CurrentState + As:       bottom-up — push local current state to parent's state (or global state if no parent).
+//   - CurrentState + AsGoal:   bottom-up — push local current state to parent's Goal-labeled state via SetGoal.
+//   - CurrentState + AsGlobalParam: write local current state directly to a named global parameter.
 type ExposeEntry struct {
-	Param        string `json:"param,omitempty" yaml:"param,omitempty"`
-	CurrentState string `json:"currentState,omitempty" yaml:"currentState,omitempty"`
-	As           string `json:"as,omitempty" yaml:"as,omitempty"`
-	AsGoal       string `json:"asGoal,omitempty" yaml:"asGoal,omitempty"`
+	Param          string `json:"param,omitempty" yaml:"param,omitempty"`
+	CurrentState   string `json:"currentState,omitempty" yaml:"currentState,omitempty"`
+	As             string `json:"as,omitempty" yaml:"as,omitempty"`
+	AsGoal         string `json:"asGoal,omitempty" yaml:"asGoal,omitempty"`
+	AsGlobalParam  string `json:"asGlobalParam,omitempty" yaml:"asGlobalParam,omitempty"`
 }
 
 // NotificationFilter allows filtering received notifications
