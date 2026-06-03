@@ -97,7 +97,7 @@ func (s *WantSpec) UnmarshalJSON(data []byte) error {
 	type wantSpecKnown struct {
 		Exposes             []ExposeEntry        `json:"exposes,omitempty"`
 		Imports             map[string]string    `json:"imports,omitempty"`
-		Using               []map[string]string  `json:"using,omitempty"`
+		Using               []UsingEntry         `json:"using,omitempty"`
 		Recipe              string               `json:"recipe,omitempty"`
 		StateSubscriptions  []StateSubscription  `json:"stateSubscriptions,omitempty"`
 		NotificationFilters []NotificationFilter `json:"notificationFilters,omitempty"`
@@ -194,7 +194,7 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 	type restSpec struct {
 		Exposes             []ExposeEntry        `yaml:"exposes,omitempty"`
 		Imports             map[string]string    `yaml:"imports,omitempty"`
-		Using               []map[string]string  `yaml:"using,omitempty"`
+		Using               []UsingEntry         `yaml:"using,omitempty"`
 		Recipe              string               `yaml:"recipe,omitempty"`
 		StateSubscriptions  []StateSubscription  `yaml:"stateSubscriptions,omitempty"`
 		NotificationFilters []NotificationFilter `yaml:"notificationFilters,omitempty"`

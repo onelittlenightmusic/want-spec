@@ -10,7 +10,7 @@ type RecipeWant struct {
 	Type        string              `yaml:"type,omitempty" json:"type,omitempty"`
 	Labels      map[string]string   `yaml:"labels,omitempty" json:"labels,omitempty"`
 	Params      map[string]any      `yaml:"params,omitempty" json:"params,omitempty"`
-	Using       []map[string]string `yaml:"using,omitempty" json:"using,omitempty"`
+	Using       []UsingEntry        `yaml:"using,omitempty" json:"using,omitempty"`
 	Requires    []string            `yaml:"requires,omitempty" json:"requires,omitempty"`
 	RecipeAgent bool                `yaml:"recipeAgent,omitempty" json:"recipeAgent,omitempty"`
 }
@@ -54,6 +54,49 @@ type RecipeContent struct {
 	Examples         []RecipeExampleDef    `yaml:"examples,omitempty" json:"examples,omitempty"`
 	State            []StateDef            `yaml:"state,omitempty" json:"state,omitempty"`
 	FinalResultField string                `yaml:"finalResultField,omitempty" json:"finalResultField,omitempty"`
+
+	// Achieve declares terminal goals for Planner-based auto-derivation of Wants.
+	// When non-empty, the Planner derives the child wants automatically.
+	// Manually-specified Wants (above) are appended after the derived ones.
+	Achieve []PlanTarget `yaml:"achieve,omitempty" json:"achieve,omitempty"`
+
+	// IsSatisfied declares a pre-check want that short-circuits the recipe:
+	// if the When condition evaluates to true, the recipe is immediately marked
+	// as achieved (the Achieve chain is skipped).
+	IsSatisfied *RecipeIsSatisfied `yaml:"isSatisfied,omitempty" json:"isSatisfied,omitempty"`
+
+	// Hints provides Planner guidance for intermediate want type selection.
+	Hints []PlanHint `yaml:"hints,omitempty" json:"hints,omitempty"`
+
+	// LabelConditions maps label selectors to conditions that are automatically
+	// injected into any using: entry matching those labels.
+	// Avoids repeating the same when: on every subscriber.
+	LabelConditions []LabelCondition `yaml:"labelConditions,omitempty" json:"labelConditions,omitempty"`
+}
+
+// LabelCondition maps a label selector to a condition that is automatically
+// injected into any using: entry whose labels contain the given match.
+// Defined once in the recipe; applies to ALL subscribers using those labels.
+type LabelCondition struct {
+	// Match is the label key-value pairs to match against using: entries.
+	Match map[string]string `yaml:"match" json:"match"`
+	// When is the condition to inject when the match succeeds.
+	When ConditionDef `yaml:"when" json:"when"`
+}
+
+// RecipeIsSatisfied defines a pre-check want and the condition that means
+// "goal already achieved — skip the Achieve chain."
+type RecipeIsSatisfied struct {
+	// Type is the want type to run as a satisfaction check (e.g. "smartgolf_check_reserved").
+	Type string `yaml:"type" json:"type"`
+
+	// Name is an optional instance name for the check want.
+	// Defaults to slugify(Type) + "-satisfied-check".
+	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+
+	// When is the condition on the check want's (exposed) state that indicates satisfaction.
+	// Example: {field: is_reserved, operator: "==", value: true}
+	When ConditionDef `yaml:"when" json:"when"`
 }
 
 // ParameterDefsToMap converts []ParameterDef to a name→default map for substitution.
