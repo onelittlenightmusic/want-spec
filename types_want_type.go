@@ -61,6 +61,10 @@ type ParameterDef struct {
 	Required                   bool            `json:"required" yaml:"required"`
 	Validation                 ValidationRules `json:"validation,omitempty" yaml:"validation,omitempty"`
 	Example                    any             `json:"example,omitempty" yaml:"example,omitempty"`
+	// SubType declares a semantic category for memo recording and autocomplete.
+	// Examples: "location", "person", "date", "url"
+	// Values entered by the user are recorded in ~/.mywant/memo.yaml under this subtype.
+	SubType                    string          `json:"subType,omitempty" yaml:"subType,omitempty"`
 }
 
 // ValidationRules defines validation constraints for parameters
