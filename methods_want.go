@@ -55,6 +55,7 @@ var knownWantSpecJSONFields = func() map[string]struct{} {
 		"when",
 		"finalResultField",
 		"resetOnRestart",
+		"autoExpose",
 	}
 	m := make(map[string]struct{}, len(fields))
 	for _, f := range fields {
@@ -173,6 +174,7 @@ var knownWantSpecYAMLFields = func() map[string]struct{} {
 		"when",
 		"finalResultField",
 		"resetOnRestart",
+		"autoExpose",
 	}
 	m := make(map[string]struct{}, len(fields))
 	for _, f := range fields {
@@ -202,6 +204,7 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 		When                []WhenSpec           `yaml:"when,omitempty"`
 		FinalResultField    string               `yaml:"finalResultField,omitempty"`
 		ResetOnRestart      *bool                `yaml:"resetOnRestart,omitempty"`
+		AutoExpose          bool                 `yaml:"autoExpose,omitempty"`
 	}
 
 	var paramsNode *yaml.Node
@@ -245,6 +248,7 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 	s.When = rest.When
 	s.FinalResultField = rest.FinalResultField
 	s.ResetOnRestart = rest.ResetOnRestart
+	s.AutoExpose = rest.AutoExpose
 
 	// ── params: object or sequence ───────────────────────────────────────────
 	if paramsNode == nil {

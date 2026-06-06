@@ -224,6 +224,11 @@ type WantSpec struct {
 	When                []WhenSpec           `json:"when,omitempty" yaml:"when,omitempty"`
 	FinalResultField    string               `json:"finalResultField,omitempty" yaml:"finalResultField,omitempty"`
 	ResetOnRestart      *bool                `json:"resetOnRestart,omitempty" yaml:"resetOnRestart,omitempty"`
+	// AutoExpose, when true, automatically creates expose handlers for every state
+	// field marked exposable in the want's WantTypeDefinition, writing each field's
+	// value to the controlling parent want's state under the same key name.
+	// Equivalent to listing all exposable fields in spec.exposes with as: <fieldName>.
+	AutoExpose          bool                 `json:"autoExpose,omitempty" yaml:"autoExpose,omitempty"`
 
 	// UnknownFields is populated by UnmarshalJSON / UnmarshalYAML when the input
 	// contains keys that this version of the spec does not recognise.  It is
