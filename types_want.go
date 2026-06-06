@@ -69,9 +69,11 @@ func (e UsingEntry) MarshalYAML() (interface{}, error) {
 		if err := whenNode.Encode(e.When); err != nil {
 			return nil, err
 		}
+		// whenNode.Encode() makes whenNode itself a MappingNode (not a DocumentNode
+		// wrapper), so whenNode is the mapping directly — not whenNode.Content[0].
 		node.Content = append(node.Content,
 			&yaml.Node{Kind: yaml.ScalarNode, Value: "when"},
-			whenNode.Content[0],
+			whenNode,
 		)
 	}
 	return node, nil
