@@ -128,9 +128,10 @@ type OwnerReference struct {
 
 // CorrelationEntry represents the correlation relationship between two Wants.
 type CorrelationEntry struct {
-	WantID string   `json:"wantID" yaml:"wantID"`
-	Labels []string `json:"labels" yaml:"labels"`
-	Rate   int      `json:"rate"   yaml:"rate"`
+	WantID   string   `json:"wantID"             yaml:"wantID"`
+	Labels   []string `json:"labels"             yaml:"labels"`
+	Rate     int      `json:"rate"               yaml:"rate"`
+	DataType string   `json:"dataType,omitempty" yaml:"dataType,omitempty"`
 }
 
 // Metadata contains want identification and classification info
