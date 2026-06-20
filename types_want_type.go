@@ -79,16 +79,17 @@ type ValidationRules struct {
 
 // StateDef defines a state key for a want type
 type StateDef struct {
-	Name         string `json:"name" yaml:"name"`
-	Description  string `json:"description" yaml:"description"`
-	Type         string `json:"type" yaml:"type"`
+	Name         string     `json:"name" yaml:"name"`
+	Description  string     `json:"description" yaml:"description"`
+	Type         string     `json:"type" yaml:"type"`
+	SubType      string     `json:"subType,omitempty" yaml:"subType,omitempty"`
 	Label        StateLabel `json:"label,omitempty" yaml:"label,omitempty"`
-	Persistent   bool   `json:"persistent" yaml:"persistent"`
-	InitialValue any    `json:"initialValue,omitempty" yaml:"initialValue,omitempty"`
-	Example      any    `json:"example,omitempty" yaml:"example,omitempty"`
-	OnFetchData  string `json:"onFetchData,omitempty" yaml:"onFetchData,omitempty"`
-	FetchFrom    string `json:"fetchFrom,omitempty" yaml:"fetchFrom,omitempty"`
-	Exposable    bool   `json:"exposable,omitempty" yaml:"exposable,omitempty"`
+	Persistent   bool       `json:"persistent" yaml:"persistent"`
+	InitialValue any        `json:"initialValue,omitempty" yaml:"initialValue,omitempty"`
+	Example      any        `json:"example,omitempty" yaml:"example,omitempty"`
+	OnFetchData  string     `json:"onFetchData,omitempty" yaml:"onFetchData,omitempty"`
+	FetchFrom    string     `json:"fetchFrom,omitempty" yaml:"fetchFrom,omitempty"`
+	Exposable    bool       `json:"exposable,omitempty" yaml:"exposable,omitempty"`
 }
 
 // ConnectivityDef defines input/output patterns for a want type
