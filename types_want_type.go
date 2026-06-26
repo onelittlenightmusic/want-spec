@@ -35,6 +35,19 @@ type WantTypeDefinition struct {
 	RelatedTypes        []string               `json:"relatedTypes" yaml:"relatedTypes"`
 	SeeAlso             []string               `json:"seeAlso" yaml:"seeAlso"`
 	GoType              string                 `json:"goType,omitempty" yaml:"goType,omitempty"`
+	Triggers            []TriggerDef           `json:"triggers,omitempty" yaml:"triggers,omitempty"`
+}
+
+// TriggerDef declares a reactive trigger for a want type.
+// When the trigger condition fires, the want's Progress() is re-executed immediately.
+type TriggerDef struct {
+	OnStateChange *StateChangeTrigger `json:"onStateChange,omitempty" yaml:"onStateChange,omitempty"`
+}
+
+// StateChangeTrigger configures a trigger that fires when a state field with the
+// given label changes value.  Use label: "plan" to react to any plan field change.
+type StateChangeTrigger struct {
+	Label string `json:"label,omitempty" yaml:"label,omitempty"`
 }
 
 // WantTypeMetadata contains want type identity and classification
