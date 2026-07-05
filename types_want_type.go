@@ -90,6 +90,7 @@ type StateDef struct {
 	OnFetchData  string     `json:"onFetchData,omitempty" yaml:"onFetchData,omitempty"`
 	FetchFrom    string     `json:"fetchFrom,omitempty" yaml:"fetchFrom,omitempty"`
 	Exposable    bool       `json:"exposable,omitempty" yaml:"exposable,omitempty"`
+	Volatile     bool       `json:"volatile,omitempty" yaml:"volatile,omitempty"`
 }
 
 // ConnectivityDef defines input/output patterns for a want type
