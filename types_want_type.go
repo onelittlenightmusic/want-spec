@@ -61,12 +61,31 @@ type ParameterDef struct {
 	Required                   bool            `json:"required" yaml:"required"`
 	Validation                 ValidationRules `json:"validation,omitempty" yaml:"validation,omitempty"`
 	Example                    any             `json:"example,omitempty" yaml:"example,omitempty"`
-	// SubType declares a semantic category for memo recording and autocomplete.
+	// SubType declares a semantic category for recording things and autocomplete.
 	// Examples: "location", "city", "date", "time", "port"
 	SubType string `json:"subType,omitempty" yaml:"subType,omitempty"`
-	// RecordMemo controls whether user-entered values are persisted to memo.yaml.
+	// RecordThing controls whether user-entered values are remembered as things.
 	// Defaults to true when SubType is set. Set to false for sensitive values (e.g. secrets).
+	RecordThing *bool `json:"recordThing,omitempty" yaml:"recordThing,omitempty"`
+	// RecordMemo is what RecordThing was called before things were called
+	// things. A want type YAML in the wild still says `recordMemo`, and it means
+	// the same, so it is read — and never written back. Use ShouldRecordThing.
+	//
+	// Deprecated: set RecordThing.
 	RecordMemo *bool `json:"recordMemo,omitempty" yaml:"recordMemo,omitempty"`
+}
+
+// ShouldRecordThing reports whether a value entered for this parameter is
+// remembered. The new spelling wins; the old one is honoured; silence means yes,
+// because a parameter that declares a SubType is asking to be remembered.
+func (p ParameterDef) ShouldRecordThing() bool {
+	if p.RecordThing != nil {
+		return *p.RecordThing
+	}
+	if p.RecordMemo != nil {
+		return *p.RecordMemo
+	}
+	return true
 }
 
 // ValidationRules defines validation constraints for parameters
