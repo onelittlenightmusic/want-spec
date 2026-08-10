@@ -109,7 +109,13 @@ type StateDef struct {
 	OnFetchData  string     `json:"onFetchData,omitempty" yaml:"onFetchData,omitempty"`
 	FetchFrom    string     `json:"fetchFrom,omitempty" yaml:"fetchFrom,omitempty"`
 	Exposable    bool       `json:"exposable,omitempty" yaml:"exposable,omitempty"`
-	Volatile     bool       `json:"volatile,omitempty" yaml:"volatile,omitempty"`
+	// Importable marks the mirror of Exposable: a slot this want type wants
+	// filled from somewhere else, rather than a value it offers. Exposable said
+	// what a want can give; nothing said what it is asking for, so a want with
+	// an obvious input had no way to advertise it and the matcher had to guess
+	// from names and types alone.
+	Importable bool `json:"importable,omitempty" yaml:"importable,omitempty"`
+	Volatile   bool `json:"volatile,omitempty" yaml:"volatile,omitempty"`
 }
 
 // ConnectivityDef defines input/output patterns for a want type
