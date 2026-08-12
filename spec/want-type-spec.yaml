@@ -46,14 +46,17 @@ components:
         connectivity:
           $ref: '#/components/schemas/ConnectivityDef'
         connect:
-          $ref: '#/components/schemas/RequireSpec'
           description: Connectivity requirement specification
+          allOf:
+            - $ref: '#/components/schemas/RequireSpec'
         require:
-          $ref: '#/components/schemas/RequireSpec'
           description: Structured connectivity requirement (deprecated, use connect)
+          allOf:
+            - $ref: '#/components/schemas/RequireSpec'
         usageLimit:
-          $ref: '#/components/schemas/UsageLimitSpec'
           description: Deprecated, use connect instead
+          allOf:
+            - $ref: '#/components/schemas/UsageLimitSpec'
         requires:
           type: array
           description: Agent capability requirements including ThinkAgent capabilities (must be at wantType level)
@@ -88,19 +91,24 @@ components:
           default: []
         finalizeWhen:
           description: Declarative termination conditions grouping achieved and failed outcomes.
-          $ref: '#/components/schemas/FinalizeWhen'
+          allOf:
+            - $ref: '#/components/schemas/FinalizeWhen'
         achievedWhen:
           description: "Deprecated: use finalizeWhen.achieved instead."
-          $ref: '#/components/schemas/ConditionDef'
+          allOf:
+            - $ref: '#/components/schemas/ConditionDef'
         onInitialize:
           description: Actions to execute when the want is initialized
-          $ref: '#/components/schemas/LifecycleHookDef'
+          allOf:
+            - $ref: '#/components/schemas/LifecycleHookDef'
         onDelete:
           description: Actions to execute when the want is deleted
-          $ref: '#/components/schemas/LifecycleHookDef'
+          allOf:
+            - $ref: '#/components/schemas/LifecycleHookDef'
         onAchieved:
           description: Actions to execute when the want reaches the achieved state
-          $ref: '#/components/schemas/LifecycleHookDef'
+          allOf:
+            - $ref: '#/components/schemas/LifecycleHookDef'
         constraints:
           type: array
           description: Business logic constraints
