@@ -64,6 +64,16 @@ type ParameterDef struct {
 	// SubType declares a semantic category for recording things and autocomplete.
 	// Examples: "location", "city", "date", "time", "port"
 	SubType string `json:"subType,omitempty" yaml:"subType,omitempty"`
+	// Accepts widens what may be PUT here without changing what a value entered
+	// here IS. SubType is one answer to two questions — what this field takes,
+	// and what a value typed into it gets remembered as — and they are not
+	// always the same question. A route's `from` takes a station, a named place,
+	// a coordinate or an address, and a name typed into it is still a station.
+	//
+	// SubType is always accepted and need not be repeated here. Empty means the
+	// field takes its SubType and nothing else, which is what every parameter
+	// written before this meant.
+	Accepts []string `json:"accepts,omitempty" yaml:"accepts,omitempty"`
 	// RecordThing controls whether user-entered values are remembered as things.
 	// Defaults to true when SubType is set. Set to false for sensitive values (e.g. secrets).
 	RecordThing *bool `json:"recordThing,omitempty" yaml:"recordThing,omitempty"`
@@ -73,6 +83,26 @@ type ParameterDef struct {
 	//
 	// Deprecated: set RecordThing.
 	RecordMemo *bool `json:"recordMemo,omitempty" yaml:"recordMemo,omitempty"`
+}
+
+// AcceptedSubTypes is everything this parameter takes: its own SubType first,
+// then whatever Accepts adds. Callers matching a value against a parameter walk
+// this rather than SubType, so a parameter that widened what it takes does not
+// have to be special-cased anywhere.
+func (p ParameterDef) AcceptedSubTypes() []string {
+	if p.SubType == "" && len(p.Accepts) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(p.Accepts)+1)
+	seen := map[string]bool{}
+	for _, s := range append([]string{p.SubType}, p.Accepts...) {
+		if s == "" || seen[s] {
+			continue
+		}
+		seen[s] = true
+		out = append(out, s)
+	}
+	return out
 }
 
 // ShouldRecordThing reports whether a value entered for this parameter is

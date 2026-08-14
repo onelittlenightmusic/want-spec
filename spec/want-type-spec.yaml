@@ -234,6 +234,31 @@ components:
           $ref: '#/components/schemas/ValidationRules'
         example:
           description: Example value
+        subType:
+          type: string
+          description: |
+            Semantic category of this parameter's value: what a value entered
+            here IS, which drives autocomplete and what catalog it is remembered
+            in. Examples: station, place, city, date, port.
+        accepts:
+          type: array
+          description: |
+            Further categories this parameter takes, without changing what a
+            value entered here is recorded as. A route's `from` accepts a
+            station, a named place, a coordinate or an address; subType stays
+            the one it records under. subType is always accepted and need not
+            be repeated. Absent means the parameter takes its subType alone.
+          items:
+            type: string
+        recordThing:
+          type: boolean
+          description: |
+            Whether values entered here are remembered as things. Defaults to
+            true when subType is set; set false for secrets.
+        recordMemo:
+          type: boolean
+          deprecated: true
+          description: What recordThing was called before things were called things.
       additionalProperties: false
 
     # Validation rules
