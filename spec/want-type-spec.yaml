@@ -204,6 +204,11 @@ components:
           type: string
           description: Parameter name
           pattern: '^[a-z][a-z0-9_]*$'
+        title:
+          type: string
+          description: |
+            What the parameter is called on screen, when its name (an ASCII
+            identifier) is not what anybody would call it.
         description:
           type: string
           description: Parameter description
@@ -259,6 +264,12 @@ components:
           type: boolean
           deprecated: true
           description: What recordThing was called before things were called things.
+        backgroundImage:
+          type: string
+          description: |
+            A picture of what this parameter stands for, drawn behind its card:
+            a URL, or a data: URL. A web want's parameters are the objects saved
+            on its page, each shown as it looked there.
       additionalProperties: false
 
     # Validation rules

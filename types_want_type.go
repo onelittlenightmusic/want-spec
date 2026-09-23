@@ -83,6 +83,15 @@ type ParameterDef struct {
 	//
 	// Deprecated: set RecordThing.
 	RecordMemo *bool `json:"recordMemo,omitempty" yaml:"recordMemo,omitempty"`
+	// Title is what the parameter is called on screen, when its name — an
+	// identifier, ASCII by rule — is not what anybody would call it. A web
+	// want's field saved from a Japanese page is `field_1` by name and
+	// 「ポスト本文」 by title.
+	Title string `json:"title,omitempty" yaml:"title,omitempty"`
+	// BackgroundImage is a picture of what this parameter stands for, drawn
+	// behind its card: a URL, or a data: URL. A web want's parameters are the
+	// objects saved on its page, and each is shown as it looked there.
+	BackgroundImage string `json:"backgroundImage,omitempty" yaml:"backgroundImage,omitempty"`
 }
 
 // AcceptedSubTypes is everything this parameter takes: its own SubType first,
