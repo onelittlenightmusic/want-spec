@@ -149,6 +149,23 @@ type Metadata struct {
 	Version         int                `json:"version,omitempty" yaml:"version,omitempty"`
 }
 
+// AlertRule is one promise about a want: while it holds, the want needs the
+// person who placed it. Exactly one of When, Status or SilentFor is set.
+//
+//   - When: a state field compares as written (the ConditionDef a want
+//     type's achievedWhen uses).
+//   - Status: the want is in one of these statuses (failed, waiting_user_action…).
+//   - SilentFor: nothing has changed for this long ("6h", "2d") — in Field
+//     if it is given, in any of the want's state if not. It stopped without
+//     failing.
+type AlertRule struct {
+	Name      string        `json:"name" yaml:"name"`
+	When      *ConditionDef `json:"when,omitempty" yaml:"when,omitempty"`
+	Status    []string      `json:"status,omitempty" yaml:"status,omitempty"`
+	SilentFor string        `json:"silentFor,omitempty" yaml:"silentFor,omitempty"`
+	Field     string        `json:"field,omitempty" yaml:"field,omitempty"`
+}
+
 // StateSubscription defines what state changes to monitor
 type StateSubscription struct {
 	WantName   string   `json:"wantName" yaml:"wantName"`
@@ -230,6 +247,10 @@ type WantSpec struct {
 	// value to the controlling parent want's state under the same key name.
 	// Equivalent to listing all exposable fields in spec.exposes with as: <fieldName>.
 	AutoExpose          bool                 `json:"autoExpose,omitempty" yaml:"autoExpose,omitempty"`
+	// Alerts are the promises the person who placed this want made about it:
+	// each one says when the want needs them. A want with no alert holding is
+	// one they do not have to come back for.
+	Alerts []AlertRule `json:"alerts,omitempty" yaml:"alerts,omitempty"`
 
 	// UnknownFields is populated by UnmarshalJSON / UnmarshalYAML when the input
 	// contains keys that this version of the spec does not recognise.  It is

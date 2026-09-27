@@ -195,6 +195,14 @@ components:
             If true (default), state is reset when the want restarts.
             Set to false to preserve state across restarts.
           default: true
+        alerts:
+          type: array
+          description: |
+            Promises the person who placed this want made about it: each says
+            when the want needs them. No alert holding means there is nothing
+            they have to come back for.
+          items:
+            $ref: '#/components/schemas/AlertRule'
       additionalProperties: false
 
     # Expose entry — declares a param or state exposure between scope levels
@@ -245,6 +253,54 @@ components:
           type: integer
           description: Notification buffer size (0 = default)
           default: 0
+      additionalProperties: false
+
+    # Alert rule — one promise about when a want needs its person
+    AlertRule:
+      type: object
+      description: |
+        While this holds, the want needs the person who placed it.
+        Exactly one of `when`, `status` or `silentFor` should be set.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: What the person will read when it holds
+          example: "雨で中止"
+        when:
+          $ref: '#/components/schemas/AlertCondition'
+        status:
+          type: array
+          description: Holds while the want is in one of these statuses
+          items:
+            type: string
+          example: ["failed", "waiting_user_action"]
+        silentFor:
+          type: string
+          description: Holds when nothing has changed for this long (Go duration, or days as "2d")
+          example: "6h"
+        field:
+          type: string
+          description: With silentFor, the state field that must keep changing (omitted = any state)
+          example: "latest_url"
+      additionalProperties: false
+
+    # The condition an alert's `when` compares (same shape as a want type's achievedWhen)
+    AlertCondition:
+      type: object
+      required:
+        - field
+      properties:
+        field:
+          type: string
+          description: State field name to evaluate
+        operator:
+          type: string
+          description: Comparison operator; omitted means the field is true
+          enum: ["==", "!=", ">", ">=", "<", "<="]
+        value:
+          description: Value to compare against
       additionalProperties: false
 
     # Notification filter — filter incoming notifications
