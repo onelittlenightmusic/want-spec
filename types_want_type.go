@@ -21,6 +21,7 @@ type WantTypeDefinition struct {
 	UsageLimit          *UsageLimitSpec        `json:"usageLimit,omitempty" yaml:"usageLimit,omitempty"`
 	Requires            []string               `json:"requires,omitempty" yaml:"requires,omitempty"`
 	MonitorCapabilities []MonitorCapabilityDef `json:"monitorCapabilities,omitempty" yaml:"monitorCapabilities,omitempty"`
+	Capabilities        []WantCapabilityDef    `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
 	FinalResultField    string                 `json:"finalResultField,omitempty" yaml:"finalResultField,omitempty"`
 	GlobalOverrideFrom  string                 `json:"globalOverrideFrom,omitempty" yaml:"globalOverrideFrom,omitempty"`
 	Agents              []AgentDef             `json:"agents" yaml:"agents"`
@@ -207,6 +208,22 @@ type UsageLimitSpec struct {
 type MonitorCapabilityDef struct {
 	Capability      string `json:"capability" yaml:"capability"`
 	IntervalSeconds int    `json:"intervalSeconds,omitempty" yaml:"intervalSeconds,omitempty"`
+}
+
+// WantCapabilityDef is one thing a want of a type can answer beyond its own
+// result: said in words for the robot to choose by (Description), and done by
+// the server — the data named in Reads gathered and handed with Prompt to the
+// model that words the answer, or Skill run. Not an agent's capability
+// (Requires, MonitorCapabilities): those are what a want needs, these what it
+// offers.
+type WantCapabilityDef struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
+	// Reads: answers | answer_photos | state.
+	Reads  []string `json:"reads,omitempty" yaml:"reads,omitempty"`
+	Prompt string   `json:"prompt,omitempty" yaml:"prompt,omitempty"`
+	// Skill is a Machine-Readable Skill, relative to the type's directory.
+	Skill string `json:"skill,omitempty" yaml:"skill,omitempty"`
 }
 
 // AgentDef defines agent integration for a want type

@@ -69,6 +69,18 @@ components:
           items:
             $ref: '#/components/schemas/MonitorCapabilityDef'
           default: []
+        capabilities:
+          type: array
+          description: |
+            What a want of this type can answer, beyond its own result — each
+            said in words for the robot to choose by, and how it is done: a
+            prompt over data the server hands it (reads), or a Machine-Readable
+            Skill of the type's own. Not an agent's capability (requires,
+            monitorCapabilities): those are what a want needs; these are what
+            it offers.
+          items:
+            $ref: '#/components/schemas/WantCapabilityDef'
+          default: []
         finalResultField:
           type: string
           description: Default state key for final_result
@@ -456,6 +468,46 @@ components:
       additionalProperties: true
 
     # Monitor capability definition
+    WantCapabilityDef:
+      type: object
+      description: |
+        One thing a want of this type can answer. The robot chooses it by its
+        description; the server does it — gathering only the data named in
+        reads and handing it, with the prompt, to the model that words the
+        answer, or running the skill named. Nothing else is reached.
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: The capability's name, unique in its type
+          example: "latest_score"
+        description:
+          type: string
+          description: What it answers, in the person's words — what the robot chooses it by
+          example: "最新のゴルフのスコアを検索できる"
+        reads:
+          type: array
+          description: |
+            The data the server gathers for the prompt, by kind: answers (the
+            want's kept answers), answer_photos (the photos joined to its
+            answers, with what was read off them), state (its current state).
+          items:
+            type: string
+            enum: [answers, answer_photos, state]
+          default: []
+        prompt:
+          type: string
+          description: How to answer from the data read — given to the model with it
+        skill:
+          type: string
+          description: |
+            A Machine-Readable Skill to run instead, its path relative to the
+            type's own directory (and inside it); the question is passed to it
+            as {"question": ...} and what it prints is the answer's data.
+      additionalProperties: false
+
     MonitorCapabilityDef:
       type: object
       description: Describes a capability provided by a MonitorAgent in this want type
