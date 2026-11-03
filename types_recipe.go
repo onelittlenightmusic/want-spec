@@ -6,13 +6,13 @@ type RecipeWant struct {
 	Spec     WantSpec `yaml:"spec,omitempty" json:"spec,omitempty"`
 
 	// Legacy flattened fields for backward compatibility
-	Name        string              `yaml:"name,omitempty" json:"name,omitempty"`
-	Type        string              `yaml:"type,omitempty" json:"type,omitempty"`
-	Labels      map[string]string   `yaml:"labels,omitempty" json:"labels,omitempty"`
-	Params      map[string]any      `yaml:"params,omitempty" json:"params,omitempty"`
-	Using       []UsingEntry        `yaml:"using,omitempty" json:"using,omitempty"`
-	Requires    []string            `yaml:"requires,omitempty" json:"requires,omitempty"`
-	RecipeAgent bool                `yaml:"recipeAgent,omitempty" json:"recipeAgent,omitempty"`
+	Name        string            `yaml:"name,omitempty" json:"name,omitempty"`
+	Type        string            `yaml:"type,omitempty" json:"type,omitempty"`
+	Labels      map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
+	Params      map[string]any    `yaml:"params,omitempty" json:"params,omitempty"`
+	Using       []UsingEntry      `yaml:"using,omitempty" json:"using,omitempty"`
+	Requires    []string          `yaml:"requires,omitempty" json:"requires,omitempty"`
+	RecipeAgent bool              `yaml:"recipeAgent,omitempty" json:"recipeAgent,omitempty"`
 }
 
 // GenericRecipe represents the top-level recipe structure
@@ -119,4 +119,6 @@ type GenericRecipeMetadata struct {
 	Type        string `yaml:"type,omitempty" json:"type,omitempty"`
 	CustomType  string `yaml:"custom_type,omitempty" json:"custom_type,omitempty"`
 	Category    string `yaml:"category,omitempty" json:"category,omitempty"`
+	// Labels are its labels: key/value pairs to find and group it by.
+	Labels map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }

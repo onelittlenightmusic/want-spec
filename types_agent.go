@@ -41,6 +41,8 @@ type Capability struct {
 	Description       string             `yaml:"description,omitempty" json:"description,omitempty"`
 	StateAccess       []StateAccessField `yaml:"stateAccess,omitempty" json:"stateAccess,omitempty"`
 	ParentStateAccess []StateAccessField `yaml:"parentStateAccess,omitempty" json:"parentStateAccess,omitempty"`
+	// Labels are its labels: key/value pairs to find and group it by.
+	Labels map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 // CapabilityYAML is the root wrapper for capability-*.yaml files.
@@ -50,11 +52,13 @@ type CapabilityYAML struct {
 
 // AgentEntryDef describes an agent registered via an agent-*.yaml file.
 type AgentEntryDef struct {
-	Name         string     `yaml:"name" json:"name"`
-	Type         AgentType  `yaml:"type" json:"type"`
+	Name         string       `yaml:"name" json:"name"`
+	Type         AgentType    `yaml:"type" json:"type"`
 	Runtime      AgentRuntime `yaml:"runtime,omitempty" json:"runtime,omitempty"`
-	Capabilities []string   `yaml:"capabilities" json:"capabilities"`
-	Uses         []string   `yaml:"uses,omitempty" json:"uses,omitempty"`
+	Capabilities []string     `yaml:"capabilities" json:"capabilities"`
+	Uses         []string     `yaml:"uses,omitempty" json:"uses,omitempty"`
+	// Labels are its labels: key/value pairs to find and group it by.
+	Labels map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 // AgentYAML is the root wrapper for agent-*.yaml files.
@@ -75,6 +79,8 @@ type MRSAgentMetadata struct {
 	Name       string `yaml:"name,omitempty" json:"name,omitempty"` // defaults to Capability if empty
 	Capability string `yaml:"capability" json:"capability"`
 	Type       string `yaml:"type" json:"type"` // "monitor" | "do"
+	// Labels are its labels: key/value pairs to find and group it by.
+	Labels map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 // MRSScriptDef describes the Python script executed by the agent.

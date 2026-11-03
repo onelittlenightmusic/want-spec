@@ -97,6 +97,11 @@ components:
           items:
             $ref: '#/components/schemas/StateAccessField'
           default: []
+        labels:
+          type: object
+          description: Its labels — key/value pairs to find and group it by.
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     # -------------------------------------------------------------------------
@@ -164,6 +169,11 @@ components:
             type: string
             minLength: 1
           example: ["booking_api", "payment_gateway"]
+        labels:
+          type: object
+          description: Its labels — key/value pairs to find and group it by.
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     # -------------------------------------------------------------------------
@@ -211,6 +221,11 @@ components:
           description: Agent execution type
           enum: ["monitor", "do"]
           example: "monitor"
+        labels:
+          type: object
+          description: Its labels — key/value pairs to find and group it by.
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     MRSScriptDef:
