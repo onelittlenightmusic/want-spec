@@ -41,11 +41,29 @@ components:
           type: string
           enum: ["Act"]
         metadata:
-          $ref: './plan-spec.yaml#/components/schemas/ResourceMeta'
+          $ref: '#/components/schemas/ResourceMeta'
         spec:
           $ref: '#/components/schemas/ActSpec'
         status:
           $ref: '#/components/schemas/ActStatus'
+      additionalProperties: false
+
+    ResourceMeta:
+      type: object
+      description: name and createdAt are given by the server (ignored when posted); labels are kept as posted. The same as plan-spec.yaml's.
+      properties:
+        name:
+          type: string
+          description: What it is kept by — act-<unix nanoseconds>.
+          example: "act-1762168737000000000"
+        createdAt:
+          type: string
+          format: date-time
+        labels:
+          type: object
+          description: Its labels, kept as posted — key/value pairs to find and group it by (GET /acts?labelSelector=k=v,…).
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     ActSpec:
