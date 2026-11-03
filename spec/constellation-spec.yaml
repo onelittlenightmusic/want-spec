@@ -100,6 +100,11 @@ components:
           description: Which kind each member is, keyed by the ids in members.
           additionalProperties:
             $ref: '#/components/schemas/ConstellationMemberKind'
+        labels:
+          type: object
+          description: The constellation's own labels (not its members'), kept on its members as constellation-labels/<name> the way its colour is.
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     ConstellationKind:
@@ -148,6 +153,11 @@ components:
         capture:
           type: string
           description: The tile it is a capture into (one of its members); absent, an order.
+        labels:
+          type: object
+          description: The constellation's own labels.
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     ConstellationUpdate:
@@ -173,6 +183,11 @@ components:
           type: string
         captureAt:
           type: string
+        labels:
+          type: object
+          description: When given, replace its labels; {} clears them.
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     ConstellationsDeleted:

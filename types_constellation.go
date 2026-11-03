@@ -52,6 +52,9 @@ type Constellation struct {
 	Members []string `yaml:"members" json:"members"`
 	// MemberKinds says which kind each member is, keyed by the ids in Members.
 	MemberKinds map[string]string `yaml:"memberKinds,omitempty" json:"memberKinds,omitempty"`
+	// Labels are the constellation's own labels (not its members'), kept on
+	// its members as constellation-labels/<name> the way its colour is.
+	Labels map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 // ConstellationList is GET /constellations.
@@ -68,7 +71,8 @@ type ConstellationCreate struct {
 	Members []string `yaml:"members" json:"members"`
 	Color   string   `yaml:"color,omitempty" json:"color,omitempty"`
 	// Capture is the tile it is a capture into (one of its members); empty, an order.
-	Capture string `yaml:"capture,omitempty" json:"capture,omitempty"`
+	Capture string            `yaml:"capture,omitempty" json:"capture,omitempty"`
+	Labels  map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 // ConstellationUpdate is the body of PUT /constellations/{name}. A nil field
@@ -81,6 +85,8 @@ type ConstellationUpdate struct {
 	Color     *string   `yaml:"color,omitempty" json:"color,omitempty"`
 	Capture   *string   `yaml:"capture,omitempty" json:"capture,omitempty"`
 	CaptureAt *string   `yaml:"captureAt,omitempty" json:"captureAt,omitempty"`
+	// Labels, when given, replace its labels; an empty map clears them.
+	Labels *map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 // ConstellationsDeleted is DELETE /constellations?names=a,b: the names

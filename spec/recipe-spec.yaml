@@ -94,6 +94,11 @@ components:
           type: string
           description: Recipe category
           example: "system"
+        labels:
+          type: object
+          description: Its labels — key/value pairs to find and group it by.
+          additionalProperties:
+            type: string
       additionalProperties: false
 
     # Parameter definition (shared with want-type-spec)
