@@ -33,3 +33,17 @@ func TestLabelSelector(t *testing.T) {
 		t.Error("a label with no = is refused")
 	}
 }
+
+func TestPlanPrevious(t *testing.T) {
+	p := Plan{Spec: PlanSpec{Question: "乗り換えを再検索して", Action: PlanActionPrevious, Type: "transit_search", Capability: "restart"}}
+	if err := p.Validate(); err != nil {
+		t.Errorf("previous is an action: %v", err)
+	}
+	p.Spec.Action = "again"
+	if err := p.Validate(); err == nil {
+		t.Error("an action there is not")
+	}
+	if PlanActions[len(PlanActions)-1] != PlanActionPrevious {
+		t.Errorf("offered: %v", PlanActions)
+	}
+}
