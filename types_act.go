@@ -22,7 +22,6 @@ import "fmt"
 //	  completionTime: …
 //	  steps: [RobotStep…]        # each tool run, as it is done
 //	  cards: [RobotCard…]        # what the steps showed
-//	  resolved: {turn, target}   # for a previous plan: the earlier turn and want found
 //	  prompt: …                  # when done: what to word the answer from
 //	  message: …                 # when failed: why
 //
@@ -73,20 +72,6 @@ type ActStatus struct {
 	Prompt string `yaml:"prompt,omitempty" json:"prompt,omitempty"`
 	// Message, when failed: why.
 	Message string `yaml:"message,omitempty" json:"message,omitempty"`
-	// Resolved, for a previous plan: what it was found to be about. Absent
-	// when nothing earlier was found (the act then answers with words alone).
-	Resolved *ActResolved `yaml:"resolved,omitempty" json:"resolved,omitempty"`
-}
-
-// ActResolved is the earlier turn a previous plan was found to be about,
-// and the want in it the plan was carried out on.
-type ActResolved struct {
-	// Turn is the earlier turn's id.
-	Turn string `yaml:"turn" json:"turn"`
-	// Target is the want's name.
-	Target string `yaml:"target" json:"target"`
-	// Type is the want's type.
-	Type string `yaml:"type,omitempty" json:"type,omitempty"`
 }
 
 // ActList is GET /acts.

@@ -70,15 +70,11 @@ components:
           example: "最新のゴルフのスコアは？"
         action:
           type: string
-          enum: ["existing", "new", "none", "previous"]
+          enum: ["existing", "new", "none"]
           description: |
             existing — a want already on the board answers (pointed at, or a
             capability of it used); new — a want of type is made with params;
-            none — nothing on the board, the answer is words alone;
-            previous — about something from earlier in the conversation that
-            the question does not name: the server finds the latest want of
-            type (or the latest want, type empty) in the earlier turns and
-            carries the plan out on it as existing, asking it capability.
+            none — nothing on the board, the answer is words alone.
         target:
           type: string
           description: For existing — the want the plan is about.
@@ -91,7 +87,7 @@ components:
           example: "rounds"
         type:
           type: string
-          description: For new — the want type to make. For previous — the type of the earlier want looked for (empty for the latest want).
+          description: For new — the want type to make.
         params:
           type: object
           description: For new — its parameters.

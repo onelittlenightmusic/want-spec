@@ -18,10 +18,10 @@ import (
 //	  labels: {device: iphone}     # kept as posted
 //	spec:
 //	  question: 最新のゴルフのスコアは？
-//	  action: existing             # existing | new | none | previous
+//	  action: existing             # existing | new | none
 //	  target: smartgolf-check-reserved-instance
 //	  capability: rounds           # existing: what is asked of it
-//	  type: ""                     # new: the type to make; previous: the type looked for
+//	  type: ""                     # new: the type to make
 //	  params: {}                   # new: its parameters
 //
 //	POST   /api/v1/plans          Plan (YAML or JSON) → Plan, named
@@ -49,18 +49,11 @@ const (
 	PlanActionNew = "new"
 	// PlanActionNone: nothing on the board; the answer is words alone.
 	PlanActionNone = "none"
-	// PlanActionPrevious: the question is about something from earlier in
-	// the conversation that it does not name (「乗り換えを再検索して」): the
-	// server finds it in the earlier turns — the latest want of Type they
-	// showed, or the latest want when Type is empty — and carries the plan
-	// out on it as existing, asking it Capability. Which turn and want it
-	// found is the act's status.resolved.
-	PlanActionPrevious = "previous"
 )
 
 // PlanActions are the actions a plan may take, in the order a model is
 // offered them.
-var PlanActions = []string{PlanActionExisting, PlanActionNew, PlanActionNone, PlanActionPrevious}
+var PlanActions = []string{PlanActionExisting, PlanActionNew, PlanActionNone}
 
 // PlanNone is the decision's own word for nothing chosen.
 const PlanNone = "-"
@@ -68,16 +61,14 @@ const PlanNone = "-"
 // PlanSpec is what is to be done.
 type PlanSpec struct {
 	Question string `yaml:"question" json:"question"`
-	// Action is existing, new, none or previous.
+	// Action is existing, new or none.
 	Action string `yaml:"action" json:"action"`
 	// Target is the want an existing plan is about.
 	Target string `yaml:"target,omitempty" json:"target,omitempty"`
-	// Capability is what is asked of Target (for previous, of the want found):
-	// one of its type's capabilities, or the standard restart. Empty: it is
-	// only pointed at.
+	// Capability is what is asked of Target: one of its type's capabilities,
+	// or the standard restart. Empty: it is only pointed at.
 	Capability string `yaml:"capability,omitempty" json:"capability,omitempty"`
-	// Type is the want type a new plan makes; for previous, the type of the
-	// earlier want looked for (empty: the latest want, whatever its type).
+	// Type is the want type a new plan makes.
 	Type string `yaml:"type,omitempty" json:"type,omitempty"`
 	// Params are the new want's parameters.
 	Params map[string]string `yaml:"params,omitempty" json:"params,omitempty"`
@@ -104,7 +95,7 @@ func (p *Plan) Validate() error {
 		return fmt.Errorf("kind must be %s", PlanKind)
 	}
 	switch p.Spec.Action {
-	case PlanActionExisting, PlanActionNew, PlanActionNone, PlanActionPrevious:
+	case PlanActionExisting, PlanActionNew, PlanActionNone:
 		return nil
 	}
 	return fmt.Errorf("spec.action must be one of %s", strings.Join(PlanActions, ", "))
