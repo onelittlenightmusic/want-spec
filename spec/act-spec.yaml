@@ -112,6 +112,26 @@ components:
         message:
           type: string
           description: When failed — why.
+        resolved:
+          $ref: '#/components/schemas/ActResolved'
+      additionalProperties: false
+
+    ActResolved:
+      type: object
+      description: For a previous plan — the earlier turn and the want in it the plan was carried out on.
+      required:
+        - turn
+        - target
+      properties:
+        turn:
+          type: string
+          description: The earlier turn's id.
+        target:
+          type: string
+          description: The want's name.
+        type:
+          type: string
+          description: The want's type.
       additionalProperties: false
 
     RobotStep:
