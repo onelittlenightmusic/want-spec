@@ -1,0 +1,187 @@
+openapi: 3.0.3
+info:
+  title: MyWant Story Schema
+  description: |
+    OpenAPI specification for a character's story — what the person playing
+    it did on the board (where they went from and to, what they opened, what
+    they asked and what they were answered), kept by the server from what it
+    is sent anyway: the cursor's moves, the GUI's state, the turns and acts.
+    A chat's answers are judged good or bad by what the person did next.
+
+      GET /api/v1/characters/{id}/story?since=&until=&kind=&limit=   StoryList
+      GET /api/v1/characters/{id}/story/digest?date=YYYY-MM-DD      StoryDigest
+
+    Kept as events for a few days (one JSON line each, a file a day), then
+    gzipped for a while, and as a day's digest for good.
+  version: 1.0.0
+  contact:
+    name: MyWant
+    url: https://github.com/onelittlenightmusic/MyWant
+
+paths: {}
+
+components:
+  schemas:
+    StoryEvent:
+      type: object
+      required: [at, character, kind]
+      properties:
+        at:
+          type: string
+          format: date-time
+        character:
+          type: string
+          description: Whose story it is (a character's id).
+        kind:
+          type: string
+          enum:
+            - canvas.move
+            - want.arrive
+            - want.leave
+            - want.open
+            - want.close
+            - want.expand
+            - view.change
+            - say
+            - chat.ask
+            - chat.answer
+            - act.done
+            - turn.outcome
+        from:
+          $ref: '#/components/schemas/StoryPlace'
+        to:
+          $ref: '#/components/schemas/StoryPlace'
+        ref:
+          type: string
+          description: What it is about — a turn's, an act's or a plan's name.
+        device:
+          type: string
+        detail:
+          type: object
+          additionalProperties:
+            type: string
+      additionalProperties: false
+
+    StoryPlace:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [want, thing, cell, view]
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          description: A want's type, or a thing's catalog.
+        x:
+          type: integer
+        y:
+          type: integer
+      additionalProperties: false
+
+    StoryList:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoryEvent'
+
+    StoryDigest:
+      type: object
+      required: [character, date]
+      properties:
+        character:
+          type: string
+        date:
+          type: string
+          format: date
+        turns:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoryTurn'
+        transitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoryTransition'
+        visits:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoryVisit'
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+        outcomes:
+          type: object
+          additionalProperties:
+            type: integer
+        summary:
+          type: string
+          description: The day in a sentence or two, when a model wrote one.
+        summaryBy:
+          type: string
+      additionalProperties: false
+
+    StoryTurn:
+      type: object
+      required: [turn, at, question]
+      properties:
+        turn:
+          type: string
+        at:
+          type: string
+          format: date-time
+        question:
+          type: string
+        plan:
+          type: object
+          description: The PlanSpec decided for it (plan-spec.yaml), when an act carried one out.
+          additionalProperties: true
+        shown:
+          type: array
+          items:
+            type: string
+          description: The wants the answer showed ("kind:id").
+        outcome:
+          type: string
+          enum: [success, corrected, reask, ignored]
+        correctedTo:
+          $ref: '#/components/schemas/StoryPlace'
+        secondsToAct:
+          type: integer
+        intent:
+          type: string
+          description: The question in a canonical form, when a model wrote one.
+        intentBy:
+          type: string
+      additionalProperties: false
+
+    StoryTransition:
+      type: object
+      required: [from, to, count]
+      properties:
+        from:
+          $ref: '#/components/schemas/StoryPlace'
+        to:
+          $ref: '#/components/schemas/StoryPlace'
+        count:
+          type: integer
+      additionalProperties: false
+
+    StoryVisit:
+      type: object
+      required: [place]
+      properties:
+        place:
+          $ref: '#/components/schemas/StoryPlace'
+        arrived:
+          type: integer
+        opened:
+          type: integer
+        seconds:
+          type: integer
+      additionalProperties: false
