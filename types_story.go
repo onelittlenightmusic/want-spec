@@ -84,7 +84,14 @@ const (
 	TurnOutcomeReask = "reask"
 	// TurnOutcomeIgnored: nothing followed from it.
 	TurnOutcomeIgnored = "ignored"
+	// TurnOutcomeWrong: the person said it was wrong (a 👎 on the answer).
+	TurnOutcomeWrong = "wrong"
 )
+
+// TurnOutcomeByPerson is a turn.outcome's Detail "by" when the person said
+// it — a 👍 (success) or a 👎 (wrong) on the answer — rather than it being
+// judged from what they did. What they said decides over what was judged.
+const TurnOutcomeByPerson = "person"
 
 // StoryList is GET /characters/{id}/story: events, oldest first.
 type StoryList struct {
@@ -125,6 +132,8 @@ type StoryTurn struct {
 	// want gone to instead.
 	Outcome     string      `yaml:"outcome,omitempty" json:"outcome,omitempty"`
 	CorrectedTo *StoryPlace `yaml:"correctedTo,omitempty" json:"correctedTo,omitempty"`
+	// By is TurnOutcomeByPerson when the person said the outcome (👍 / 👎).
+	By string `yaml:"by,omitempty" json:"by,omitempty"`
 	// SecondsToAct is how long after the answer the person went somewhere.
 	SecondsToAct int `yaml:"secondsToAct,omitempty" json:"secondsToAct,omitempty"`
 	// Intent is the question put in a canonical form, when a model wrote one
