@@ -148,7 +148,15 @@ components:
           description: The wants the answer showed ("kind:id").
         outcome:
           type: string
-          enum: [success, corrected, reask, ignored]
+          enum: [success, corrected, reask, ignored, wrong]
+          description: |
+            Judged from what the person did next, or said by them (by person):
+            a 👍 on the answer is success, a 👎 wrong. What they said decides
+            over what was judged.
+        by:
+          type: string
+          enum: [person]
+          description: The outcome was said by the person, not judged.
         correctedTo:
           $ref: '#/components/schemas/StoryPlace'
         secondsToAct:
