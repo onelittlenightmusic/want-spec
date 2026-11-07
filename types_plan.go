@@ -72,6 +72,12 @@ type PlanSpec struct {
 	Type string `yaml:"type,omitempty" json:"type,omitempty"`
 	// Params are the new want's parameters.
 	Params map[string]string `yaml:"params,omitempty" json:"params,omitempty"`
+	// AnswerTemplate, for new: the answer as it will be worded when the want
+	// is done, its result's fields in braces ({name} the want's name,
+	// {fare} its fare …) — written while the decision is made, so no model
+	// is asked again once it is done. Kept by the server for the type and
+	// used again; one whose fields the result does not fill is dropped.
+	AnswerTemplate string `yaml:"answerTemplate,omitempty" json:"answerTemplate,omitempty"`
 }
 
 // PlanList is GET /plans.
