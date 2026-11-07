@@ -93,6 +93,14 @@ components:
           description: For new — its parameters.
           additionalProperties:
             type: string
+        answerTemplate:
+          type: string
+          description: |
+            For new — the answer as it will be worded when the want is done,
+            its result's fields in braces ({name} the want's name). Kept by the
+            server for the type and used again; dropped when the result does
+            not fill it.
+          example: "「{name}」を出しました。{departure}発、{arrival}着、{fare}円です。"
       additionalProperties: false
 
     PlanList:

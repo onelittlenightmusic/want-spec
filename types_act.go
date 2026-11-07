@@ -70,6 +70,9 @@ type ActStatus struct {
 	Cards          []*RobotCard `yaml:"cards" json:"cards"`
 	// Prompt, when done: what to word the answer from.
 	Prompt string `yaml:"prompt,omitempty" json:"prompt,omitempty"`
+	// Answer, when done: the answer already worded — the type's answer
+	// template filled from the result. Empty: word it from Prompt.
+	Answer string `yaml:"answer,omitempty" json:"answer,omitempty"`
 	// Message, when failed: why.
 	Message string `yaml:"message,omitempty" json:"message,omitempty"`
 }

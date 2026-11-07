@@ -109,6 +109,9 @@ components:
         prompt:
           type: string
           description: When done — what to word the answer from.
+        answer:
+          type: string
+          description: When done — the answer already worded (the type's answer template, filled from the result). Empty — word it from prompt.
         message:
           type: string
           description: When failed — why.
