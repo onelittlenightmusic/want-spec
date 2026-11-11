@@ -84,6 +84,30 @@ components:
         finalResultField:
           type: string
           description: Default state key for final_result
+        timings:
+          type: array
+          description: |
+            The moments of the type's answer worth telling of. The want says one
+            came from its Progress (Want.Timing("name"); a plugin script prints
+            {"_timing": "name"}); one with `if` or `onChange` is also read off
+            every answer kept to its history. A want chooses which
+            it murmurs at (its tile's "!", labels `murmur`) and which it
+            notifies at (a push, label `notify`) — a comma list of names, or
+            `none`. With no label, a timing's own murmur / notify say.
+          items:
+            type: object
+            required: [name]
+            properties:
+              name: {type: string}
+              description: {type: string}
+              if:
+                type: string
+                description: A field (result or state) that must be truthy; none — always.
+              onChange:
+                type: string
+                description: A field that must differ from its value at the last answer; none — every answer.
+              murmur: {type: boolean, default: false}
+              notify: {type: boolean, default: false}
         globalOverrideFrom:
           type: string
           description: |

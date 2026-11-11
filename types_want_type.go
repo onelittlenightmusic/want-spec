@@ -36,6 +36,24 @@ type WantTypeDefinition struct {
 	RelatedTypes        []string               `json:"relatedTypes" yaml:"relatedTypes"`
 	SeeAlso             []string               `json:"seeAlso" yaml:"seeAlso"`
 	GoType              string                 `json:"goType,omitempty" yaml:"goType,omitempty"`
+	// Timings: the moments of the type's answer worth telling of — each a
+	// want chooses, for murmuring (its tile's "!") and for notifying (a push).
+	Timings []TimingDef `json:"timings,omitempty" yaml:"timings,omitempty"`
+}
+
+// TimingDef is one moment worth telling of, among a type's answers. The want
+// says it came from its Progress (Want.Timing, a script's {"_timing": name});
+// one naming If (a field that must be truthy) or OnChange (a field that must
+// differ from its value at the last answer) is also read off every answer kept
+// to the history. Murmur and Notify say whether a want that chose none of its
+// own murmurs and notifies at it.
+type TimingDef struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	If          string `json:"if,omitempty" yaml:"if,omitempty"`
+	OnChange    string `json:"onChange,omitempty" yaml:"onChange,omitempty"`
+	Murmur      bool   `json:"murmur,omitempty" yaml:"murmur,omitempty"`
+	Notify      bool   `json:"notify,omitempty" yaml:"notify,omitempty"`
 }
 
 // WantTypeMetadata contains want type identity and classification
