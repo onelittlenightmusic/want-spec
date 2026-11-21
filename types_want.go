@@ -236,6 +236,15 @@ type VoiceSpec struct {
 	Notify *[]string `json:"notify,omitempty" yaml:"notify,omitempty"`
 }
 
+// HearSpec is one kind of murmur a want hears: from wants of Type, at Timings
+// (its type's timing names), from the Nearest of them to it on the board
+// (default 1) — so a want hears what is said near it, not across the board.
+type HearSpec struct {
+	Type    string   `json:"type" yaml:"type"`
+	Timings []string `json:"timings,omitempty" yaml:"timings,omitempty"`
+	Nearest int      `json:"nearest,omitempty" yaml:"nearest,omitempty"`
+}
+
 type WantSpec struct {
 	Params  map[string]any `json:"params" yaml:"params"`
 	Exposes []ExposeEntry  `json:"exposes,omitempty" yaml:"exposes,omitempty"`
@@ -263,6 +272,9 @@ type WantSpec struct {
 	// Voice: when the want speaks up about its answers — at which of its
 	// type's timings it murmurs and notifies. Unset, the type's own say.
 	Voice *VoiceSpec `json:"voice,omitempty" yaml:"voice,omitempty"`
+	// Hear: whose murmurs the want hears — other wants' timings it is woken
+	// by, to answer in its Progress (Want.Hear) or in its voice.
+	Hear []HearSpec `json:"hear,omitempty" yaml:"hear,omitempty"`
 
 	// UnknownFields is populated by UnmarshalJSON / UnmarshalYAML when the input
 	// contains keys that this version of the spec does not recognise.  It is

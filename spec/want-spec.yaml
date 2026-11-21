@@ -217,6 +217,22 @@ components:
               type: array
               items: {type: string}
           additionalProperties: false
+        hear:
+          type: array
+          description: |
+            Whose murmurs the want hears: other wants' timings it is woken by,
+            to answer in its Progress or its voice — from wants of `type`, at
+            `timings`, the `nearest` of them to it on the board (default 1).
+          items:
+            type: object
+            required: [type]
+            properties:
+              type: {type: string}
+              timings:
+                type: array
+                items: {type: string}
+              nearest: {type: integer, minimum: 1}
+            additionalProperties: false
       additionalProperties: false
 
     # Expose entry — declares a param or state exposure between scope levels

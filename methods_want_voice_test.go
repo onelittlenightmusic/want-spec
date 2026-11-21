@@ -31,3 +31,19 @@ func TestWantSpecVoice(t *testing.T) {
 		t.Fatal("a list left out came back set")
 	}
 }
+
+func TestWantSpecHear(t *testing.T) {
+	var s WantSpec
+	if err := yaml.Unmarshal([]byte("params: {}\nhear:\n  - type: smartgolf_check_reserved\n    timings: [booked]\n    nearest: 2\n"), &s); err != nil {
+		t.Fatal(err)
+	}
+	if len(s.UnknownFields) != 0 || len(s.Hear) != 1 || s.Hear[0].Type != "smartgolf_check_reserved" || s.Hear[0].Timings[0] != "booked" || s.Hear[0].Nearest != 2 {
+		t.Fatalf("hear = %+v (unknown %v)", s.Hear, s.UnknownFields)
+	}
+	b, _ := json.Marshal(s)
+	var back WantSpec
+	_ = json.Unmarshal(b, &back)
+	if len(back.Hear) != 1 || back.Hear[0].Nearest != 2 {
+		t.Fatalf("json round trip: %s", b)
+	}
+}

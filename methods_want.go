@@ -58,6 +58,7 @@ var knownWantSpecJSONFields = func() map[string]struct{} {
 		"autoExpose",
 		"alerts",
 		"voice",
+		"hear",
 	}
 	m := make(map[string]struct{}, len(fields))
 	for _, f := range fields {
@@ -110,6 +111,7 @@ func (s *WantSpec) UnmarshalJSON(data []byte) error {
 		ResetOnRestart      *bool                `json:"resetOnRestart,omitempty"`
 		Alerts              []AlertRule          `json:"alerts,omitempty"`
 		Voice               *VoiceSpec           `json:"voice,omitempty"`
+		Hear                []HearSpec           `json:"hear,omitempty"`
 	}
 	var raw struct {
 		wantSpecKnown
@@ -131,6 +133,7 @@ func (s *WantSpec) UnmarshalJSON(data []byte) error {
 	s.ResetOnRestart = raw.ResetOnRestart
 	s.Alerts = raw.Alerts
 	s.Voice = raw.Voice
+	s.Hear = raw.Hear
 
 	// ── Step 3: detect unknown fields ───────────────────────────────────────
 	// Populate UnknownFields so callers can log schema-drift warnings.
@@ -183,6 +186,7 @@ var knownWantSpecYAMLFields = func() map[string]struct{} {
 		"autoExpose",
 		"alerts",
 		"voice",
+		"hear",
 	}
 	m := make(map[string]struct{}, len(fields))
 	for _, f := range fields {
@@ -215,6 +219,7 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 		AutoExpose          bool                 `yaml:"autoExpose,omitempty"`
 		Alerts              []AlertRule          `yaml:"alerts,omitempty"`
 		Voice               *VoiceSpec           `yaml:"voice,omitempty"`
+		Hear                []HearSpec           `yaml:"hear,omitempty"`
 	}
 
 	var paramsNode *yaml.Node
@@ -261,6 +266,7 @@ func (s *WantSpec) UnmarshalYAML(value *yaml.Node) error {
 	s.AutoExpose = rest.AutoExpose
 	s.Alerts = rest.Alerts
 	s.Voice = rest.Voice
+	s.Hear = rest.Hear
 
 	// ── params: object or sequence ───────────────────────────────────────────
 	if paramsNode == nil {
