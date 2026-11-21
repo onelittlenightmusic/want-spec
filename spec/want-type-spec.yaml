@@ -89,8 +89,9 @@ components:
           description: |
             The moments of the type's answer worth telling of. The want says one
             came from its Progress (Want.Timing("name"); a plugin script prints
-            {"_timing": "name"}); one with `if` or `onChange` is also read off
-            every answer kept to its history. A want chooses which
+            {"_timing": "name"}); one with `if`, `onChange`, `onIncrease` or
+            `onDecrease` is also read off every answer kept to its history
+            (those given all hold). A want chooses which
             it murmurs at (its tile's "!", labels `murmur`) and which it
             notifies at (a push, label `notify`) — a comma list of names, or
             `none`. With no label, a timing's own murmur / notify say.
@@ -106,6 +107,12 @@ components:
               onChange:
                 type: string
                 description: A field that must differ from its value at the last answer; none — every answer.
+              onIncrease:
+                type: string
+                description: A field that must have grown since the last answer — a number, or a list's length (an item added).
+              onDecrease:
+                type: string
+                description: A field that must have shrunk since the last answer — a number, or a list's length (an item gone).
               murmur: {type: boolean, default: false}
               notify: {type: boolean, default: false}
         globalOverrideFrom:

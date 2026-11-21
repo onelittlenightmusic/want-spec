@@ -43,15 +43,19 @@ type WantTypeDefinition struct {
 
 // TimingDef is one moment worth telling of, among a type's answers. The want
 // says it came from its Progress (Want.Timing, a script's {"_timing": name});
-// one naming If (a field that must be truthy) or OnChange (a field that must
-// differ from its value at the last answer) is also read off every answer kept
-// to the history. Murmur and Notify say whether a want that chose none of its
+// one naming If (a field that must be truthy), OnChange (a field that must
+// differ from its value at the last answer), OnIncrease or OnDecrease (a field
+// that must have grown or shrunk since the last answer — a number, or a
+// list's length: an item added) is also read off every answer kept to the
+// history; those named all hold. Murmur and Notify say whether a want that chose none of its
 // own murmurs and notifies at it.
 type TimingDef struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	If          string `json:"if,omitempty" yaml:"if,omitempty"`
 	OnChange    string `json:"onChange,omitempty" yaml:"onChange,omitempty"`
+	OnIncrease  string `json:"onIncrease,omitempty" yaml:"onIncrease,omitempty"`
+	OnDecrease  string `json:"onDecrease,omitempty" yaml:"onDecrease,omitempty"`
 	Murmur      bool   `json:"murmur,omitempty" yaml:"murmur,omitempty"`
 	Notify      bool   `json:"notify,omitempty" yaml:"notify,omitempty"`
 }
