@@ -227,9 +227,18 @@ type Want struct {
 }
 
 // WantSpec contains the desired state configuration for a want
+// VoiceSpec is when a want speaks up about its answers: the names of its
+// type's timings (TimingDef) it murmurs at (its tile's "!") and notifies at
+// (a push). A list left out is the type's own say (each timing's murmur /
+// notify); an empty one, none.
+type VoiceSpec struct {
+	Murmur *[]string `json:"murmur,omitempty" yaml:"murmur,omitempty"`
+	Notify *[]string `json:"notify,omitempty" yaml:"notify,omitempty"`
+}
+
 type WantSpec struct {
-	Params              map[string]any       `json:"params" yaml:"params"`
-	Exposes             []ExposeEntry        `json:"exposes,omitempty" yaml:"exposes,omitempty"`
+	Params  map[string]any `json:"params" yaml:"params"`
+	Exposes []ExposeEntry  `json:"exposes,omitempty" yaml:"exposes,omitempty"`
 	// Imports maps global state keys to internal state keys.
 	// Imported fields are read-only: reads transparently return the current global state value;
 	// writes are silently blocked. Values are never copied — they are always resolved live.
@@ -246,11 +255,14 @@ type WantSpec struct {
 	// field marked exposable in the want's WantTypeDefinition, writing each field's
 	// value to the controlling parent want's state under the same key name.
 	// Equivalent to listing all exposable fields in spec.exposes with as: <fieldName>.
-	AutoExpose          bool                 `json:"autoExpose,omitempty" yaml:"autoExpose,omitempty"`
+	AutoExpose bool `json:"autoExpose,omitempty" yaml:"autoExpose,omitempty"`
 	// Alerts are the promises the person who placed this want made about it:
 	// each one says when the want needs them. A want with no alert holding is
 	// one they do not have to come back for.
 	Alerts []AlertRule `json:"alerts,omitempty" yaml:"alerts,omitempty"`
+	// Voice: when the want speaks up about its answers — at which of its
+	// type's timings it murmurs and notifies. Unset, the type's own say.
+	Voice *VoiceSpec `json:"voice,omitempty" yaml:"voice,omitempty"`
 
 	// UnknownFields is populated by UnmarshalJSON / UnmarshalYAML when the input
 	// contains keys that this version of the spec does not recognise.  It is
