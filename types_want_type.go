@@ -27,15 +27,20 @@ type WantTypeDefinition struct {
 	Agents              []AgentDef             `json:"agents" yaml:"agents"`
 	InlineAgents        []InlineAgentDef       `json:"inlineAgents,omitempty" yaml:"inlineAgents,omitempty"`
 	FinalizeWhen        *FinalizeWhen          `json:"finalizeWhen,omitempty" yaml:"finalizeWhen,omitempty"`
-	AchievedWhen        *ConditionDef          `json:"achievedWhen,omitempty" yaml:"achievedWhen,omitempty"`
-	OnInitialize        *LifecycleHookDef      `json:"onInitialize,omitempty" yaml:"onInitialize,omitempty"`
-	OnDelete            *LifecycleHookDef      `json:"onDelete,omitempty" yaml:"onDelete,omitempty"`
-	OnAchieved          *LifecycleHookDef      `json:"onAchieved,omitempty" yaml:"onAchieved,omitempty"`
-	Constraints         []ConstraintDef        `json:"constraints" yaml:"constraints"`
-	Examples            []ExampleDef           `json:"examples" yaml:"examples"`
-	RelatedTypes        []string               `json:"relatedTypes" yaml:"relatedTypes"`
-	SeeAlso             []string               `json:"seeAlso" yaml:"seeAlso"`
-	GoType              string                 `json:"goType,omitempty" yaml:"goType,omitempty"`
+	// RequestAsNew: a restart of a want of this type is a new request — what
+	// it had answered is to the request before, so it is not achieved again
+	// until it answers this one (a transit search fixes its departure when
+	// asked). Starting the server again is not a request.
+	RequestAsNew bool              `json:"requestAsNew,omitempty" yaml:"requestAsNew,omitempty"`
+	AchievedWhen *ConditionDef     `json:"achievedWhen,omitempty" yaml:"achievedWhen,omitempty"`
+	OnInitialize *LifecycleHookDef `json:"onInitialize,omitempty" yaml:"onInitialize,omitempty"`
+	OnDelete     *LifecycleHookDef `json:"onDelete,omitempty" yaml:"onDelete,omitempty"`
+	OnAchieved   *LifecycleHookDef `json:"onAchieved,omitempty" yaml:"onAchieved,omitempty"`
+	Constraints  []ConstraintDef   `json:"constraints" yaml:"constraints"`
+	Examples     []ExampleDef      `json:"examples" yaml:"examples"`
+	RelatedTypes []string          `json:"relatedTypes" yaml:"relatedTypes"`
+	SeeAlso      []string          `json:"seeAlso" yaml:"seeAlso"`
+	GoType       string            `json:"goType,omitempty" yaml:"goType,omitempty"`
 	// Timings: the moments of the type's answer worth telling of — each a
 	// want chooses, for murmuring (its tile's "!") and for notifying (a push).
 	Timings []TimingDef `json:"timings,omitempty" yaml:"timings,omitempty"`

@@ -132,6 +132,14 @@ components:
           items:
             $ref: '#/components/schemas/InlineAgentDef'
           default: []
+        requestAsNew:
+          type: boolean
+          description: |
+            A restart of a want of this type is a new request: what it had
+            answered belongs to the request before, so it is not achieved again
+            until it answers this one. Starting the server again is not a
+            request.
+          default: false
         finalizeWhen:
           description: Declarative termination conditions grouping achieved and failed outcomes.
           allOf:
