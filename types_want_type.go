@@ -44,6 +44,24 @@ type WantTypeDefinition struct {
 	// Timings: the moments of the type's answer worth telling of — each a
 	// want chooses, for murmuring (its tile's "!") and for notifying (a push).
 	Timings []TimingDef `json:"timings,omitempty" yaml:"timings,omitempty"`
+	// Hearing: what a want of this type does with a murmur it heard (spec.hear)
+	// — told to the person choosing what it hears. None: it answers in a word.
+	Hearing *HearingDef `json:"hearing,omitempty" yaml:"hearing,omitempty"`
+}
+
+// How a want answers what it heard.
+const (
+	HearingSay     = "say"     // a word back (its voice, or its Progress)
+	HearingPropose = "propose" // proposes things, done only on the person's yes
+	HearingAct     = "act"     // acts at once, unasked (only on itself)
+)
+
+// HearingDef is what a type does with a murmur it heard: Kind (HearingSay,
+// HearingPropose, HearingAct) and Description, said as what it does
+// (「盤面で花火を上げる」).
+type HearingDef struct {
+	Kind        string `json:"kind,omitempty" yaml:"kind,omitempty"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
 // TimingDef is one moment worth telling of, among a type's answers. The want
@@ -57,12 +75,15 @@ type WantTypeDefinition struct {
 type TimingDef struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-	If          string `json:"if,omitempty" yaml:"if,omitempty"`
-	OnChange    string `json:"onChange,omitempty" yaml:"onChange,omitempty"`
-	OnIncrease  string `json:"onIncrease,omitempty" yaml:"onIncrease,omitempty"`
-	OnDecrease  string `json:"onDecrease,omitempty" yaml:"onDecrease,omitempty"`
-	Murmur      bool   `json:"murmur,omitempty" yaml:"murmur,omitempty"`
-	Notify      bool   `json:"notify,omitempty" yaml:"notify,omitempty"`
+	// Icon names the moment's glyph (a lucide icon name, as a type's
+	// type-icon label does) — drawn wherever the timing is shown.
+	Icon       string `json:"icon,omitempty" yaml:"icon,omitempty"`
+	If         string `json:"if,omitempty" yaml:"if,omitempty"`
+	OnChange   string `json:"onChange,omitempty" yaml:"onChange,omitempty"`
+	OnIncrease string `json:"onIncrease,omitempty" yaml:"onIncrease,omitempty"`
+	OnDecrease string `json:"onDecrease,omitempty" yaml:"onDecrease,omitempty"`
+	Murmur     bool   `json:"murmur,omitempty" yaml:"murmur,omitempty"`
+	Notify     bool   `json:"notify,omitempty" yaml:"notify,omitempty"`
 }
 
 // WantTypeMetadata contains want type identity and classification

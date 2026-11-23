@@ -101,6 +101,9 @@ components:
             properties:
               name: {type: string}
               description: {type: string}
+              icon:
+                type: string
+                description: The moment's glyph, a lucide icon name (as a type's type-icon label); none — a clock.
               if:
                 type: string
                 description: A field (result or state) that must be truthy; none — always.
@@ -132,6 +135,22 @@ components:
           items:
             $ref: '#/components/schemas/InlineAgentDef'
           default: []
+        hearing:
+          type: object
+          description: |
+            What a want of this type does with a murmur it heard (spec.hear),
+            told to the person choosing what it hears. Without it, the want
+            answers in a word.
+          properties:
+            kind:
+              type: string
+              enum: [say, propose, act]
+              description: |
+                say — a word back; propose — proposes things, done only on the
+                person's yes; act — acts at once, unasked, only on itself.
+            description:
+              type: string
+              description: What it does, said as an action (「盤面で花火を上げる」).
         requestAsNew:
           type: boolean
           description: |
