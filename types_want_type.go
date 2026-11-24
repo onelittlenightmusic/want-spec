@@ -57,10 +57,20 @@ type WantTypeDefinition struct {
 // (At, for a request whose answer turns on the time — 「10分後に…」 said at
 // 19:33 is 19:43), and the parameters it is to be made with (Params, the
 // right answer; a parameter left out is one the request does not say).
+//
+// <alias> in Say is the type's name said as any of its aliases (its label
+// aliases): 「中野の<alias>」 is 「中野の天気」 and 「中野のweather」. A
+// parameter given as <home> is to be the asker's home at that part of the
+// day — a place not said, filled with where they go then ({at: "<home>"}
+// for 「<alias>」).
 type AskDef struct {
 	Say    string         `json:"say" yaml:"say"`
 	At     string         `json:"at,omitempty" yaml:"at,omitempty"`
 	Params map[string]any `json:"params,omitempty" yaml:"params,omitempty"`
+	// Variants: the same ask said other ways — the same meaning, at, and
+	// params. What reads requests learns from these; Say is what it is
+	// tested on, so it is tested on words it has not learnt.
+	Variants []string `json:"variants,omitempty" yaml:"variants,omitempty"`
 }
 
 // How a want answers what it heard.
@@ -98,6 +108,18 @@ type TimingDef struct {
 	OnDecrease string `json:"onDecrease,omitempty" yaml:"onDecrease,omitempty"`
 	Murmur     bool   `json:"murmur,omitempty" yaml:"murmur,omitempty"`
 	Notify     bool   `json:"notify,omitempty" yaml:"notify,omitempty"`
+	// Irregular: the moment is out of the ordinary — a train late, a
+	// reservation changed or taken away, a backup failed — not the answer
+	// coming round as it does. What is routine a want that hears it answers
+	// (spec.hear); an irregular moment is the robot's to look at, and to
+	// propose what to do about it.
+	Irregular bool `json:"irregular,omitempty" yaml:"irregular,omitempty"`
+	// Requires: what the moment needs done — reschedule (the time planned
+	// again), notify (the person told), rebook (taken again), retry (done
+	// again), or a word of the type's own. Met by a capability that attends
+	// to it (WantCapabilityDef.Attends), of whatever type: the moment names
+	// no type that answers it.
+	Requires []string `json:"requires,omitempty" yaml:"requires,omitempty"`
 }
 
 // WantTypeMetadata contains want type identity and classification
@@ -286,6 +308,10 @@ type WantCapabilityDef struct {
 	Prompt string   `json:"prompt,omitempty" yaml:"prompt,omitempty"`
 	// Skill is a Machine-Readable Skill, relative to the type's directory.
 	Skill string `json:"skill,omitempty" yaml:"skill,omitempty"`
+	// Attends: what this meets of an irregular moment's needs (a timing's
+	// Requires: reschedule, notify, rebook, retry …) — of any type's. One
+	// nobody hears, the robot proposes asking a want of this type for it.
+	Attends []string `json:"attends,omitempty" yaml:"attends,omitempty"`
 }
 
 // AgentDef defines agent integration for a want type

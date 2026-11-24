@@ -118,6 +118,23 @@ components:
                 description: A field that must have shrunk since the last answer — a number, or a list's length (an item gone).
               murmur: {type: boolean, default: false}
               notify: {type: boolean, default: false}
+              irregular:
+                type: boolean
+                default: false
+                description: |
+                  The moment is out of the ordinary — a train late, a reservation
+                  changed or taken away, a backup failed — not the answer coming
+                  round as it does. What is routine a want that hears it answers;
+                  an irregular moment is the robot's to look at and propose about.
+              requires:
+                type: array
+                items: {type: string}
+                description: |
+                  What the moment needs done — reschedule (the time planned
+                  again), notify (the person told), rebook (taken again), retry
+                  (done again), or a word of the type's own. Met by a capability
+                  that attends to it, of whatever type: the moment names no type.
+                example: [reschedule, notify]
         globalOverrideFrom:
           type: string
           description: |
@@ -572,6 +589,15 @@ components:
             A Machine-Readable Skill to run instead, its path relative to the
             type's own directory (and inside it); the question is passed to it
             as {"question": ...} and what it prints is the answer's data.
+        attends:
+          type: array
+          items:
+            type: string
+          description: |
+            What this meets of an irregular moment's needs (a timing's
+            requires: reschedule, notify, rebook, retry …), of any type's. One
+            nobody hears, the robot proposes asking a want of this type for it.
+          example: [reschedule]
       additionalProperties: false
 
     MonitorCapabilityDef:
@@ -736,7 +762,10 @@ components:
       properties:
         say:
           type: string
-          description: What is said
+          description: |
+            What is said. <alias> is the type's name said as any of its
+            aliases (its label aliases) — one ask written, one for each alias:
+            「中野の<alias>」 is 「中野の天気」 and 「中野のweather」.
           example: 10分後に国分寺から中野坂上
         at:
           type: string
@@ -746,9 +775,20 @@ components:
           example: "19:33"
         params:
           type: object
-          description: The parameters it is to be made with; one left out is not said
+          description: |
+            The parameters it is to be made with; one left out is not said.
+            A value <home> is the asker's home at that part of the day — a
+            place not said, filled with where they go then.
           additionalProperties: true
           example: {from: 国分寺, to: 中野坂上, time: "19:43", arrive_type: 出発}
+        variants:
+          type: array
+          items: {type: string}
+          description: |
+            The same ask said other ways — the same meaning, at and params.
+            What reads requests learns from these; say is what it is tested
+            on, so it is tested on words it has not learnt.
+          example: ["国分寺から中野坂上まで、10分後に出たい", "10分したら国分寺を出て中野坂上へ"]
       additionalProperties: false
 
     # Example definition
