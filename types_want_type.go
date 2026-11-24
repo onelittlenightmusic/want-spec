@@ -47,6 +47,20 @@ type WantTypeDefinition struct {
 	// Hearing: what a want of this type does with a murmur it heard (spec.hear)
 	// — told to the person choosing what it hears. None: it answers in a word.
 	Hearing *HearingDef `json:"hearing,omitempty" yaml:"hearing,omitempty"`
+	// Asks: how a person asks for a want of this type, in words, and what it
+	// is to be made with — what reads requests (the robot, Laya) learns from
+	// them and is tested on them. Not Examples, which show a want's YAML.
+	Asks []AskDef `json:"asks,omitempty" yaml:"asks,omitempty"`
+}
+
+// AskDef is one way a want of the type is asked for: what is said (Say), when
+// (At, for a request whose answer turns on the time — 「10分後に…」 said at
+// 19:33 is 19:43), and the parameters it is to be made with (Params, the
+// right answer; a parameter left out is one the request does not say).
+type AskDef struct {
+	Say    string         `json:"say" yaml:"say"`
+	At     string         `json:"at,omitempty" yaml:"at,omitempty"`
+	Params map[string]any `json:"params,omitempty" yaml:"params,omitempty"`
 }
 
 // How a want answers what it heard.

@@ -135,6 +135,14 @@ components:
           items:
             $ref: '#/components/schemas/InlineAgentDef'
           default: []
+        asks:
+          type: array
+          description: |
+            How a person asks for a want of this type, in words, and the
+            parameters it is to be made with (AskDef) — what reads requests
+            learns from and is tested on.
+          items:
+            $ref: '#/components/schemas/AskDef'
         hearing:
           type: object
           description: |
@@ -714,6 +722,33 @@ components:
         validation:
           type: string
           description: Validation rule
+      additionalProperties: false
+
+    # How a want of the type is asked for, in words
+    AskDef:
+      type: object
+      description: |
+        One way a person asks for a want of this type, and the parameters it
+        is to be made with. What reads requests (the robot, Laya) learns from
+        these and is tested on them. Not ExampleDef, which shows a want's YAML.
+      required:
+        - say
+      properties:
+        say:
+          type: string
+          description: What is said
+          example: 10分後に国分寺から中野坂上
+        at:
+          type: string
+          description: |
+            When it was said (HH:MM, or a date and time) — for a request whose
+            right answer turns on the time: 「10分後に…」 said at 19:33 is 19:43.
+          example: "19:33"
+        params:
+          type: object
+          description: The parameters it is to be made with; one left out is not said
+          additionalProperties: true
+          example: {from: 国分寺, to: 中野坂上, time: "19:43", arrive_type: 出発}
       additionalProperties: false
 
     # Example definition
