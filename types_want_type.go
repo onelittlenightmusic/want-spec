@@ -177,6 +177,59 @@ type ParameterDef struct {
 	// behind its card: a URL, or a data: URL. A web want's parameters are the
 	// objects saved on its page, and each is shown as it looked there.
 	BackgroundImage string `json:"backgroundImage,omitempty" yaml:"backgroundImage,omitempty"`
+	// Context is the kind of the person's context — what they are about now,
+	// read from their last requests — that fills this parameter when a request
+	// leaves it out: one of ContextKinds (place.destination, time.date, …). A
+	// route's `to` is place.destination, so 「歩いて行くと？」 said after
+	// 「国分寺までの乗り換え」 is the walk to 国分寺. A value said always wins;
+	// empty, not filled.
+	Context string `json:"context,omitempty" yaml:"context,omitempty"`
+}
+
+// ContextKind is one kind of what a person is about now (ParameterDef.Context):
+// <category>.<kind>, the categories where, when, with whom, about what and
+// how they like it.
+type ContextKind struct {
+	Name string `json:"name" yaml:"name"`
+	// Category is the part before the dot: place, time, people, interest, preference.
+	Category    string `json:"category" yaml:"category"`
+	Description string `json:"description" yaml:"description"`
+	// Example is a value as it is kept.
+	Example string `json:"example,omitempty" yaml:"example,omitempty"`
+}
+
+// ContextKinds are every kind a parameter's Context may name, by category.
+var ContextKinds = []ContextKind{
+	// place — where
+	{Name: "place.destination", Category: "place", Description: "the place they are going to", Example: "国分寺"},
+	{Name: "place.origin", Category: "place", Description: "the place they are leaving from", Example: "中野坂上"},
+	{Name: "place.area", Category: "place", Description: "the town, city or country they are asking about (not going to)", Example: "吉祥寺"},
+	// time — when
+	{Name: "time.date", Category: "time", Description: "the day it is for, as YYYY-MM-DD", Example: "2026-11-26"},
+	{Name: "time.at", Category: "time", Description: "the time something is planned for, as HH:MM", Example: "19:00"},
+	{Name: "time.arrive_by", Category: "time", Description: "the time they must be there by, as HH:MM", Example: "10:00"},
+	{Name: "time.depart_at", Category: "time", Description: "the time they will leave, as HH:MM", Example: "09:15"},
+	{Name: "time.duration", Category: "time", Description: "how long, as 5m, 1h30m", Example: "30m"},
+	// people — with whom
+	{Name: "people.party_size", Category: "people", Description: "how many people, as a number", Example: "4"},
+	{Name: "people.who", Category: "people", Description: "who they are with or meeting", Example: "田中さん"},
+	// interest — about what
+	{Name: "interest.topic", Category: "interest", Description: "what they are doing, in a word or two", Example: "移動"},
+	{Name: "interest.subject", Category: "interest", Description: "the team, event, artist or thing they are following, by name", Example: "阪神"},
+	// preference — how they like it
+	{Name: "preference.mode", Category: "preference", Description: "how they get there: walking, cycling, driving or transit", Example: "walking"},
+	{Name: "preference.budget", Category: "preference", Description: "how much they will spend, as a number", Example: "5000"},
+	{Name: "preference.cuisine", Category: "preference", Description: "the food they want", Example: "ラーメン"},
+}
+
+// ContextKindByName is the kind named, false when there is none.
+func ContextKindByName(name string) (ContextKind, bool) {
+	for _, k := range ContextKinds {
+		if k.Name == name {
+			return k, true
+		}
+	}
+	return ContextKind{}, false
 }
 
 // AcceptedSubTypes is everything this parameter takes: its own SubType first,

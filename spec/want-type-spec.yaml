@@ -334,6 +334,34 @@ components:
           $ref: '#/components/schemas/ValidationRules'
         example:
           description: Example value
+        context:
+          type: string
+          enum:
+            - place.destination
+            - place.origin
+            - place.area
+            - time.date
+            - time.at
+            - time.arrive_by
+            - time.depart_at
+            - time.duration
+            - people.party_size
+            - people.who
+            - interest.topic
+            - interest.subject
+            - preference.mode
+            - preference.budget
+            - preference.cuisine
+          description: |
+            The kind of the person's context (what they are about now, read
+            from their last requests) that fills this parameter when a request
+            leaves it out — a route's `to` is place.destination. A value said
+            always wins. Kinds, by category:
+              place       destination (going to), origin (leaving from), area (asking about)
+              time        date (YYYY-MM-DD), at (planned HH:MM), arrive_by, depart_at, duration (5m)
+              people      party_size (a number), who (with whom)
+              interest    topic (what they are doing), subject (a team, event, artist followed)
+              preference  mode (walking/cycling/driving/transit), budget, cuisine
         subType:
           type: string
           description: |
