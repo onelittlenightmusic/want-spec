@@ -1,0 +1,160 @@
+openapi: 3.0.3
+info:
+  title: MyWant Character Schema
+  description: |
+    OpenAPI specification for a MyWant character — someone on the board: a
+    person, played from a device, or one acting as a robot (label
+    robot=true), moved by the backend and answered by the robot's model with
+    its tools. What they see is theirs (story-spec.yaml's story, what they
+    remember hearing), and so is when it is worth telling: a character has
+    timings, as a want type does (want-type-spec.yaml's timings), read off the
+    character's own state (CharacterState).
+
+      GET  /api/v1/characters/{id}?format=yaml   Character
+      POST /api/v1/characters/apply              Character (YAML or JSON) →
+                                                 the character as kept
+
+    Apply finds the character by metadata.id, else by metadata.name, else
+    makes one; what the document gives is laid on it (its labels added, its
+    timings replacing theirs).
+  version: 1.0.0
+  contact:
+    name: MyWant
+    url: https://github.com/onelittlenightmusic/MyWant
+
+paths: {}
+
+components:
+  schemas:
+    Character:
+      type: object
+      description: One character.
+      required:
+        - kind
+        - metadata
+      properties:
+        apiVersion:
+          type: string
+          example: "mywant.io/v1"
+        kind:
+          type: string
+          enum: ["Character"]
+        metadata:
+          $ref: '#/components/schemas/CharacterMetadata'
+        spec:
+          $ref: '#/components/schemas/CharacterSpec'
+      additionalProperties: false
+
+    CharacterMetadata:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          description: Their identity, made once when they are made.
+          example: "chr-a8092b7d"
+        name:
+          type: string
+          description: What they are called.
+          example: "aaa"
+        labels:
+          type: object
+          description: |
+            Their labels. robot: "true" — they act as a robot. tile-design /
+            aura-design — the designs they pick for their tiles and aura.
+          additionalProperties:
+            type: string
+      additionalProperties: false
+
+    CharacterSpec:
+      type: object
+      properties:
+        avatar:
+          type: string
+          description: The emoji they are drawn as.
+          example: "🦊"
+        color:
+          type: string
+          description: Theirs, #rrggbb.
+          pattern: '^#[0-9a-fA-F]{6}$'
+          example: "#0ea5e9"
+        shape:
+          type: string
+          description: The outline they stand in.
+          example: "circle"
+        timings:
+          type: array
+          description: |
+            The moments worth telling of — each read when something happens
+            to them (they hear something, come back from an errand, move) off
+            their state (CharacterState): `if` a field truthy, `onChange` /
+            `onIncrease` / `onDecrease` a field changed since it was last
+            read (those given all hold). `murmur`: said in their bubble;
+            `notify`: a notice from them, as a want's notice is.
+
+            Every character has the standard timings (errand-different:
+            notify; uneasy: murmur) unless one here is named the same.
+          items:
+            type: object
+            required: [name]
+            properties:
+              name: {type: string}
+              description: {type: string}
+              icon: {type: string}
+              if: {type: string}
+              onChange: {type: string}
+              onIncrease: {type: string}
+              onDecrease: {type: string}
+              murmur: {type: boolean}
+              notify: {type: boolean}
+              irregular: {type: boolean}
+              requires:
+                type: array
+                items: {type: string}
+            additionalProperties: false
+          example:
+            - name: errand-different
+              description: お使いで想定と違った
+              if: errand_different
+              notify: true
+            - name: worried
+              description: 気になることができた
+              onChange: mood
+              if: mood_uneasy
+              notify: true
+      additionalProperties: false
+
+    CharacterState:
+      type: object
+      description: |
+        A character's state — the fields their timings read. Not kept as a
+        document: read from what they remember (mood, intensity, heard), where
+        they stand (place), and, as they come back from an errand, how it went.
+      properties:
+        mood:
+          type: string
+          enum: [joy, eager, calm, waiting, worried, sad]
+        intensity:
+          type: number
+          minimum: 0
+          maximum: 1
+        mood_uneasy:
+          type: boolean
+          description: Worried or sad.
+        place:
+          type: string
+          description: The name of what they stand on.
+        heard:
+          type: string
+          description: The newest thing they remember hearing.
+        errand_verdict:
+          type: string
+          enum: [same, different, unknown, first]
+          description: How the errand they are back from went (only as they come back).
+        errand_different:
+          type: boolean
+          description: Back from an errand that found other than they expected.
+        errand_report:
+          type: string
+          description: What they said of it.
